@@ -1,1 +1,511 @@
 /* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@import 'm3-theme.scss';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@include mat.core();
+
+* {
+  @include mat.all-component-themes($light-theme);
+
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+:root {
+  --white: #FFFFFF;
+  --black: #000000;
+
+  --primary-100: #f3f2fc;
+  --primary-150: #e1dff8;
+  --primary-200: #cfcbf3;
+  --primary-250: #bdb7ef;
+  --primary-300: #aba4ea;
+  --primary-350: #9890e6;
+  --primary-400: #867ce1;
+  --primary-450: #7468dd;
+  --primary-500: #6355D8;
+  --primary-550: #4d3ed3;
+  --primary-600: #3d2dc7;
+  --primary-650: #3628b1;
+  --primary-700: #2f239a;
+  --primary-750: #281e83;
+  --primary-800: #21196c;
+  --primary-850: #1a1355;
+  --primary-900: #130e3e;
+
+  --secondary-100: #fcf2fc;
+  --secondary-150: #f9e1f8;
+  --secondary-200: #f5d0f4;
+  --secondary-250: #f2bff0;
+  --secondary-300: #efafec;
+  --secondary-350: #eb9ee8;
+  --secondary-400: #e88de5;
+  --secondary-450: #e47ce1;
+  --secondary-500: #E16DDE;
+  --secondary-550: #db4ed6;
+  --secondary-600: #d532d0;
+  --secondary-650: #bd27b8;
+  --secondary-700: #a1219d;
+  --secondary-750: #841b81;
+  --secondary-800: #681565;
+  --secondary-850: #4b0f49;
+  --secondary-900: #2e0a2d;
+
+  --info-100: #f0f8fe;
+  --info-150: #d4ebfd;
+  --info-200: #b8defc;
+  --info-250: #9cd2fa;
+  --info-300: #80c5f9;
+  --info-350: #64b8f8;
+  --info-400: #48abf6;
+  --info-450: #2c9ef5;
+  --info-500: #1091f4;
+  --info-550: #0b83df;
+  --info-600: #0974c6;
+  --info-650: #0865ad;
+  --info-700: #075794;
+  --info-750: #06487a;
+  --info-800: #053961;
+  --info-850: #032a48;
+  --info-900: #021b2f;
+
+  --warning-100: #fef8f1;
+  --warning-150: #fcecd9;
+  --warning-200: #fae0c2;
+  --warning-250: #f8d4aa;
+  --warning-300: #f6c892;
+  --warning-350: #f4bc7b;
+  --warning-400: #f2b063;
+  --warning-450: #f0a44c;
+  --warning-500: #ef9834;
+  --warning-550: #ec8917;
+  --warning-600: #d37911;
+  --warning-650: #b7680f;
+  --warning-700: #9a580c;
+  --warning-750: #7d470a;
+  --warning-800: #603708;
+  --warning-850: #432605;
+  --warning-900: #271603;
+
+  --danger-100: #fef0f1;
+  --danger-150: #fdd7d8;
+  --danger-200: #fbbdbf;
+  --danger-250: #faa3a6;
+  --danger-300: #f8898d;
+  --danger-350: #f76f73;
+  --danger-400: #f5555a;
+  --danger-450: #f43b41;
+  --danger-500: #f22128;
+  --danger-550: #eb0e15;
+  --danger-600: #d20c13;
+  --danger-650: #b90b11;
+  --danger-700: #9f090e;
+  --danger-750: #86080c;
+  --danger-800: #6d060a;
+  --danger-850: #540508;
+  --danger-900: #3b0305;
+
+  --success-100: #eefdf3;
+  --success-150: #d3f9e0;
+  --success-200: #b8f5cd;
+  --success-250: #9df2b9;
+  --success-300: #82eea6;
+  --success-350: #67ea93;
+  --success-400: #4ce77f;
+  --success-450: #31e36c;
+  --success-500: #1dd75b;
+  --success-550: #1ac052;
+  --success-600: #17a948;
+  --success-650: #14923e;
+  --success-700: #117b34;
+  --success-750: #0e642a;
+  --success-800: #0a4d20;
+  --success-850: #073517;
+  --success-900: #041e0d;
+
+  --neutral-100: #FAFAFB;
+  --neutral-150: #F8F9FA;
+  --neutral-200: #F3F4F6;
+  --neutral-250: #EAECEF;
+  --neutral-300: #DEE1E6;
+  --neutral-350: #CFD2DA;
+  --neutral-400: #BCC1CA;
+  --neutral-450: #A7ADB7;
+  --neutral-500: #9095a0;
+  --neutral-550: #6E7787;
+  --neutral-600: #565E6C;
+  --neutral-650: #424955;
+  --neutral-700: #323842;
+  --neutral-750: ;
+  --neutral-800: ;
+  --neutral-850: ;
+  --neutral-900: #171A1F;
+
+  --color-1-100: #fef2f1;
+  --color-1-150: #fbdfdd;
+  --color-1-200: #f9ccca;
+  --color-1-250: #f7b9b6;
+  --color-1-300: #f5a7a3;
+  --color-1-350: #f3948f;
+  --color-1-400: #f1817b;
+  --color-1-450: #ef6f68;
+  --color-1-500: #ED5D56;
+  --color-1-550: #ea4037;
+  --color-1-600: #e72419;
+  --color-1-650: #ca1e15;
+  --color-1-700: #ad1a12;
+  --color-1-750: #90160f;
+  --color-1-800: #72110c;
+  --color-1-850: #550d09;
+  --color-1-900: #370806;
+
+  --color-2-100: #fef9ee;
+  --color-2-150: #fbf1d6;
+  --color-2-200: #f9e9be;
+  --color-2-250: #f7e1a5;
+  --color-2-300: #f5d98d;
+  --color-2-350: #f3d175;
+  --color-2-400: #f1c95c;
+  --color-2-450: #efc144;
+  --color-2-500: #ECB82B;
+  --color-2-550: #e6ae14;
+  --color-2-600: #ca9912;
+  --color-2-650: #ad830f;
+  --color-2-700: #916e0d;
+  --color-2-750: #75590a;
+  --color-2-800: #594308;
+  --color-2-850: #3d2e05;
+  --color-2-900: #201903;
+
+  --color-3-100: #f3fbf8;
+  --color-3-150: #e0f6ee;
+  --color-3-200: #cef0e3;
+  --color-3-250: #bbebd9;
+  --color-3-300: #a9e5ce;
+  --color-3-350: #96e0c3;
+  --color-3-400: #83dab9;
+  --color-3-450: #71d4ae;
+  --color-3-500: #60CFA5;
+  --color-3-550: #45c795;
+  --color-3-600: #36b584;
+  --color-3-650: #2f9c72;
+  --color-3-700: #278360;
+  --color-3-750: #1f694d;
+  --color-3-800: #18503b;
+  --color-3-850: #103728;
+  --color-3-900: #091e16;
+
+  --font-family-heading: 'Montserrat';
+  --font-family-body: 'Poppins';
+
+  --border-radius-xs: 0.1875rem;
+  --border-radius-s: 0.25rem;
+  --border-radius-m: 0.375rem;
+  --border-radius-l: 0.5rem;
+  --border-radius-xl: 0.75rem;
+  --border-radius-100-percent: 100%;
+
+  --box-shadow-xs: 0px 0px 1px rgba(23, 26, 31, 0.07), 0px 0px 2px rgba(23, 26, 31, 0.12);
+  --box-shadow-s: 0px 2px 5px rgba(23, 26, 31, 0.09), 0px 0px 2px rgba(23, 26, 31, 0.12);
+  --box-shadow-m: 0px 4px 9px rgba(23, 26, 31, 0.11), 0px 0px 2px rgba(23, 26, 31, 0.12);
+  --box-shadow-l: 0px 8px 17px rgba(23, 26, 31, 0.15), 0px 0px 2px rgba(23, 26, 31, 0.12);
+  --box-shadow-xl: 0px 17px 35px rgba(23, 26, 31, 0.24), 0px 0px 2px rgba(23, 26, 31, 0.12);
+
+  --filter-primary-500: brightness(0) saturate(100%) invert(33%) sepia(59%) saturate(1325%) hue-rotate(220deg) brightness(96%) contrast(95%);
+  --filter-neutral-900: brightness(0) saturate(100%) invert(10%) sepia(7%) saturate(1212%) hue-rotate(184deg) brightness(99%) contrast(99%);
+  --filter-neutral-400: brightness(0) saturate(100%) invert(80%) sepia(3%) saturate(664%) hue-rotate(185deg) brightness(95%) contrast(95%);
+  --filter-color-1-500: brightness(0) saturate(100%) invert(43%) sepia(85%) saturate(673%) hue-rotate(319deg) brightness(96%) contrast(92%);
+}
+
+:root {
+  --font-size-t1: 0.6875rem;
+  --line-height-t1: 1.125rem;
+  --font-size-t2: 0.75rem;
+  --line-height-t2: 1.25rem;
+  --font-size-t3: 0.875rem;
+  --line-height-t3: 1.375rem;
+  --font-size-t4: 1rem;
+  --line-height-t4: 1.625rem;
+  --font-size-t5: 1.125rem;
+  --line-height-t5: 1.75rem;
+  --font-size-t6: 1.25rem;
+  --line-height-t6: 1.875rem;
+  --font-size-t7: 1.5rem;
+  --line-height-t7: 2.25rem;
+  --font-size-t8: 2rem;
+  --line-height-t8: 3rem;
+  --font-size-t9: 2.5rem;
+  --line-height-t9: 3.5rem;
+  --font-size-t10: 3rem;
+  --line-height-t10: 4.25rem;
+  --font-size-t10-1: 4rem;
+  --line-height-t10-1: 5.25rem;
+  --font-size-t10-2: 5rem;
+  --line-height-t10-2: 6.5rem;
+  --font-size-t11: 6.25rem;
+  --line-height-t11: 8.125rem;
+  --font-size-t12: 12.5rem;
+  --line-height-t12: 15rem;
+  --font-size-t13: 18.75rem;
+  --line-height-t13: 22.5rem;
+  --font-size-t14: 31.25rem;
+  --line-height-t14: 37.5rem;
+}
+
+/* Spacing */
+:root {
+  --spacing-s0: 0.125rem;
+  --spacing-s1: 0.25rem;
+  --spacing-s2: 0.375rem;
+  --spacing-s3: 0.5rem;
+  --spacing-s4: 0.75rem;
+  --spacing-s5: 1rem;
+  --spacing-s6: 1.25rem;
+  --spacing-s7: 1.5rem;
+  --spacing-s8: 1.75rem;
+  --spacing-s9: 2rem;
+  --spacing-s10: 2.25rem;
+  --spacing-s11: 2.5rem;
+  --spacing-s12: 2.75rem;
+  --spacing-s13: 3rem;
+  --spacing-s14: 3.5rem;
+  --spacing-s15: 4rem;
+  --spacing-s16: 6rem;
+  --spacing-s17: 8rem;
+  --spacing-s18: 12rem;
+  --spacing-s19: 16rem;
+  --spacing-s20: 24rem;
+}
+
+/* Width */
+:root {
+  --width-Sz_NONE: 0rem;
+  --width-Sz0: 0.125rem;
+  --width-Sz1: 0.25rem;
+  --width-Sz2: 0.375rem;
+  --width-Sz3: 0.5rem;
+  --width-Sz4: 0.75rem;
+  --width-Sz5: 1rem;
+  --width-Sz6: 1.25rem;
+  --width-Sz7: 1.5rem;
+  --width-Sz8: 1.75rem;
+  --width-Sz9: 2rem;
+  --width-Sz10: 2.25rem;
+  --width-Sz11: 2.5rem;
+  --width-Sz12: 2.75rem;
+  --width-Sz13: 3rem;
+  --width-Sz14: 3.25rem;
+  --width-Sz15: 3.5rem;
+  --width-Sz16: 3.75rem;
+  --width-Sz17: 4rem;
+  --width-Sz18: 6rem;
+  --width-Sz19: 8rem;
+  --width-Sz20: 12rem;
+  --width-Sz21: 16rem;
+  --width-Sz22: 24rem;
+  --width-Sz23: 32rem;
+  --width-Sz24: 40rem;
+  --width-Sz25: 48rem;
+  --width-Sz26: 56rem;
+  --width-Sz27: 64rem;
+}
+
+/* Height */
+:root {
+  --height-Sz_NONE: 0rem;
+  --height-Sz0: 0.125rem;
+  --height-Sz1: 0.25rem;
+  --height-Sz2: 0.375rem;
+  --height-Sz3: 0.5rem;
+  --height-Sz4: 0.75rem;
+  --height-Sz5: 1rem;
+  --height-Sz6: 1.25rem;
+  --height-Sz7: 1.5rem;
+  --height-Sz8: 1.75rem;
+  --height-Sz9: 2rem;
+  --height-Sz10: 2.25rem;
+  --height-Sz11: 2.5rem;
+  --height-Sz12: 2.75rem;
+  --height-Sz13: 3rem;
+  --height-Sz14: 3.25rem;
+  --height-Sz15: 3.5rem;
+  --height-Sz16: 3.75rem;
+  --height-Sz17: 4rem;
+  --height-Sz18: 6rem;
+  --height-Sz19: 8rem;
+  --height-Sz20: 12rem;
+  --height-Sz21: 16rem;
+  --height-Sz22: 24rem;
+  --height-Sz23: 32rem;
+  --height-Sz24: 40rem;
+  --height-Sz25: 48rem;
+  --height-Sz26: 56rem;
+  --height-Sz27: 64rem;
+}
+
+main {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: inherit;
+  position: relative;
+}
+
+h1 {
+  font-family: var(--font-family-heading);
+  font-size: 3.5rem;
+  line-height: 4.875rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+h2 {
+  font-family: var(--font-family-heading);
+  font-size: 3rem;
+  line-height: 4.25rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+h3 {
+  font-family: var(--font-family-heading);
+  font-size: 2.5rem;
+  line-height: 3.5rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+h4 {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  line-height: 2.75rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+h5 {
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+h6 {
+  font-family: var(--font-family-heading);
+  font-size: 1.25rem;
+  line-height: 1.875rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+a {
+  text-decoration: none;
+}
+
+input {
+  padding: 0 1rem;
+  font-size: 1rem;
+  line-height: 2.625rem;
+  color: var(--neutral-500);
+  background: var(--neutral-150);
+  border-radius: var(--border-radius-m);
+  border-width: 1px;
+  border-color: var(--neutral-400);
+  border-style: solid;
+  outline: none;
+
+  &:hover {
+    color: var(--neutral-500);
+    background: var(--neutral-150);
+    border-color: var(--neutral-450);
+  }
+
+  &:focus {
+    color: var(--neutral-900);
+    background: var(--white);
+    border-color: var(--primary-500);
+  }
+
+  &:disabled {
+    color: var(--neutral-500);
+    background: var(--neutral-150);
+    border-color: var(--neutral-400);
+  }
+
+  &::placeholder {
+    font-family: var(--font-family-body);
+    color: var(--neutral-400);
+  }
+
+  &.ng-invalid.ng-touched {
+    color: var(--color-1-500);
+    border-color: var(--danger-500);
+
+    &:hover {
+      color: var(--color-1-500);
+      background: var(--white);
+      border-color: var(--danger-600);
+    }
+
+    &:focus {
+      color: var(--color-1-500);
+      background: var(--white);
+      border-color: var(--danger-500);
+    }
+
+    &:disabled {
+      color: var(--color-1-500);
+      background: var(--white);
+      border-color: var(--danger-500);
+    }
+  }
+}
+
+.input-wicon {
+  padding-right: 52px;
+
+  &-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    filter: var(--filter-neutral-900);
+
+    &.invalid {
+      filter: var(--filter-color-1-500);
+    }
+  }
+
+  &-button {
+    width: 1.25rem;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    background: none;
+    position: absolute;
+    top: 2.25rem;
+    right: 1rem;
+    align-content: center;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
