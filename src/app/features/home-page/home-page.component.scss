@@ -1,0 +1,130 @@
+.learn-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  padding: 2.25rem 0;
+
+  h1 {
+    text-align: center;
+  }
+
+  .text {
+    font-size: 1.25rem;
+    line-height: 1.875rem;
+    color: var(--neutral-500);
+    text-align: center;
+    max-width: 780px;
+  }
+
+  .video-container {
+    width: 100%;
+    max-width: 957px;
+    margin: 0 auto;
+
+    .responsive-iframe-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+
+      .responsive-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    }
+  }
+}
+
+.join-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.25rem 0;
+  position: relative;
+  overflow: hidden;
+
+  background: var(--neutral-100);
+  border-radius: var(--border-radius-m);
+
+  h2 {
+    color: var(--primary-500);
+    z-index: 1;
+  }
+
+  .text2 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    color: var(--neutral-900);
+    max-width: 510px;
+    text-align: center;
+  }
+
+  button {
+    height: 52px;
+    padding: 0 20px;
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .oval {
+    position: absolute;
+    top: 171px;
+    left: -73px;
+    width: 295px;
+    height: 295px;
+    background: var(--primary-400);
+    border-radius: 50%;
+  }
+
+  .circle {
+    position: absolute;
+    top: -189px;
+    right: -265px;
+    width: 383px;
+    height: 383px;
+    border-radius: 0px;
+  }
+
+  .dots-right {
+    position: absolute;
+    bottom: -168px;
+    right: -109px;
+    width: 177px;
+    height: 264px;
+    border-radius: 0px;
+  }
+
+  .dots-left {
+    position: absolute;
+    top: -160px;
+    left: 165px;
+    width: 177px;
+    height: 264px;
+    border-radius: 0px;
+  }
+
+  @media (max-width: 700px) {
+    .oval {
+      top: 221px;
+      left: -173px;
+    }
+
+    .circle {
+      top: -289px;
+      right: -265px;
+    }
+
+    .dots-left {
+      top: -160px;
+      left: -110px;
+    }
+
+  }
+}
