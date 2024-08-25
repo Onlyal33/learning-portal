@@ -1,0 +1,146 @@
+.container {
+  display: flex;
+  align-items: center;
+}
+
+.text {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-t8);
+  line-height: var(--line-height-t8);
+  font-weight: bold;
+  color: var(--neutral-900);
+}
+
+.header-menu {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-t3);
+  line-height: var(--line-height-t3);
+  font-weight: 400;
+  opacity: 1;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+}
+
+.header-menu .header-menu-list {
+  list-style: none;
+  padding: 0;
+  gap: 0;
+  display: flex;
+}
+
+.header-menu .header-menu-item {
+  padding: 0.8125rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-600);
+  background: transparent;
+  border-radius: var(--border-radius-m);
+  cursor: pointer;
+  white-space: nowrap;
+  float: left;
+}
+
+.header-menu .header-menu-item.selected {
+  position: relative;
+  font-weight: 700;
+  color: var(--primary-500);
+  background: transparent;
+}
+
+.header-menu .header-menu-item.selected:hover:active {
+  color: var(--primary-500);
+  background: transparent;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-left: auto;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+}
+
+.collapsible-menu {
+  display: none;
+
+  @media (max-width: 700px) {
+    display: block;
+    position: absolute;
+    left: 0.25rem;
+    top: 0;
+    width: 100%;
+    background: var(--neutral-100);
+    z-index: 1000;
+  }
+}
+
+.collapsible-menu-button {
+  display: none;
+
+  @media (max-width: 700px) {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 1rem;
+    cursor: pointer;
+  }
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  filter: brightness(0) saturate(100%) invert(33%) sepia(59%) saturate(1325%) hue-rotate(220deg) brightness(96%) contrast(95%);
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.675rem;
+  opacity: 1;
+  list-style: none;
+
+  &-item {
+    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    color: var(--neutral-600);
+    background: transparent;
+    border-radius: 0;
+    gap: 0.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &.indent {
+      padding-left: 2rem;
+    }
+
+    &.selected {
+      position: relative;
+      font-weight: 700;
+      color: var(--primary-500);
+      background: transparent;
+
+      &:hover:active {
+        color: var(--primary-500);
+        background: transparent;
+      }
+
+      .indicator {
+        width: 0.25rem;
+        height: 100%;
+        background: var(--primary-500);
+        border-radius: 0;
+      }
+    }
+  }
+}
