@@ -1,0 +1,38 @@
+<div class="profile-container">
+  <h5>{{ editMode ? "Edit profile" : "My profile" }}</h5>
+  <div *ngIf="editMode" class="photo-text">Profile Photo</div>
+  <div class="profile-header">
+    <img [src]="profile.photo" alt="Profile Picture" class="profile-pic">
+    <div *ngIf="!editMode" class="status">
+      <span class="label">Status</span>
+      <span class="status-indicator" [class.active]="profile.isActive">{{ profile.isActive ? 'Active' : 'Not Active'
+        }}</span>
+    </div>
+  </div>
+  <div class="profile-info" *ngIf="!editMode">
+    <div class="info-item" *ngFor="let info of profileInfo">
+      <span class="label">{{ info.labelText }}</span>
+      <span class="value">{{ info.value }}</span>
+    </div>
+  </div>
+  <form [formGroup]="profileForm" *ngIf="editMode" (ngSubmit)="saveProfile()" class="form">
+    <div *ngFor="let field of profileInfo" class="form__control">
+      <label [for]="field.label"
+        [class.invalid]="profileForm.get(field.label)?.invalid && profileForm.get(field.label)?.touched">{{
+        field.labelText }}</label>
+      <input [id]="field.label" [formControlName]="field.label" [type]="field.type || 'text'" />
+      <div *ngIf="profileForm.get(field.label)?.invalid && profileForm.get(field.label)?.touched">
+        <div *ngIf="profileForm.get(field.label)?.errors?.['required']" class="validation-error">
+          {{ field.label }} is required.
+        </div>
+      </div>
+    </div>
+    <mat-slide-toggle formControlName="isActive" labelPosition='before' class="toggle">Active</mat-slide-toggle>
+  </form>
+  <div class="profile-actions">
+    <app-button (click)="toggleEditMode()" [variant]="editMode ? 'primary-light' : 'primary'">{{ editMode ? 'Cancel' :
+      'Edit profile' }}</app-button>
+    <app-button *ngIf="editMode" (click)="saveProfile()">Save changes</app-button>
+    <app-button *ngIf="!editMode" variant="color-3">Change Password</app-button>
+  </div>
+</div>
