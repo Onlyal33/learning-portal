@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 6rem 8.25rem;
+
+}
+
+.subheading {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--neutral-900);
+  text-align: center;
+}
+
+$size: 4.5rem;
+
+.success-mark {
+  width: $size;
+  height: $size;
+  background: var(--color-3-600);
+  border-radius: 50%;
+  position: relative;
+
+  .image {
+    position: absolute;
+    width: $size * 4 / 6;
+    height: $size * 4 / 6;
+    top: $size / 6;
+    left: $size / 6;
+  }
+}
+
+.text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
