@@ -1,0 +1,249 @@
+.footer-menu {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.footer-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-menu-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  gap: 0.75rem;
+}
+
+.footer-menu-item {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--neutral-900);
+  cursor: pointer;
+}
+
+.h6-primary {
+  color: var(--primary-500);
+}
+
+.text-small {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--neutral-650);
+}
+
+.subscribe-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.subscribe-section-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.footer-menu-end {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-top: 1rem;
+  border-width: 0;
+  border-top-width: 1px;
+  border-top-color: var(--neutral-300);
+  border-top-style: solid;
+}
+
+.footer-end {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.footer-end-item {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--neutral-650);
+}
+
+.select-container {
+  opacity: 1;
+}
+
+.line-break {
+  width: 100%;
+  display: block;
+  height: 1px;
+  background-color: var(--neutral-300);
+}
+
+.select-container select {
+  min-height: 2.25rem;
+  padding-left: 0.75rem;
+  padding-right: 2.125rem;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  background: var(--neutral-250);
+  border-radius: var(--border-radius-m, 6px);
+  border-width: 0;
+  outline: none;
+}
+
+.select-container svg {
+  width: 1rem;
+  height: 1rem;
+  fill: var(--neutral-900);
+}
+
+/* hover */
+.select-container select:hover {
+  color: var(--neutral-900);
+  background: var(--neutral-250);
+}
+
+/* focused */
+.select-container select:focus {
+  color: var(--neutral-900);
+  background: var(--white);
+}
+
+/* disabled */
+.select-container select:disabled {
+  color: var(--neutral-900);
+  background: var(--neutral-250);
+}
+
+.select-container :disabled+.icon,
+.select-container :disabled+.icon+.icon {
+  fill: var(--neutral-900);
+}
+
+.footer-icons {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.footer-icons .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  filter: brightness(0) saturate(100%) invert(33%) sepia(59%) saturate(1325%) hue-rotate(220deg) brightness(96%) contrast(95%);
+}
+
+.footer-icons .icon:hover {
+  opacity: 0.7;
+}
+
+.email-input-container {
+  position: relative;
+  display: flex;
+  opacity: 1;
+
+  input {
+    min-width: 16rem;
+    min-height: 2.25rem;
+    padding-left: 2.125rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.375rem;
+    background: transparent;
+    border-radius: var(--border-radius-m) 0 0 var(--border-radius-m);
+    border-width: 1px;
+    border-color: var(--neutral-400);
+    border-style: solid;
+    outline: none;
+
+    &:hover {
+      color: var(--neutral-400);
+      border-color: var(--neutral-450);
+    }
+
+    &:focus {
+      color: var(--neutral-400);
+      border-color: var(--neutral-500);
+    }
+
+    &:disabled {
+      color: var(--neutral-400);
+      border-color: var(--neutral-400);
+    }
+  }
+
+  img.left {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    filter: brightness(0) saturate(100%) invert(10%) sepia(7%) saturate(1212%) hue-rotate(184deg) brightness(99%) contrast(99%);
+  }
+
+  :disabled+.icon,
+  :disabled+.icon+.icon {
+    fill: var(--neutral-900);
+  }
+
+  button {
+    border-radius: 0 var(--border-radius-m) var(--border-radius-m) 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .display-none-sm {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+
+  .footer-menu,
+  .footer-menu-section,
+  .footer-menu-list,
+  .footer-menu-end,
+  .subscribe-section,
+  .subscribe-section-text-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .line-break {
+    display: none;
+  }
+
+  .footer-menu {
+    gap: 2.5rem;
+  }
+
+  .footer-menu-section {
+    order: 1;
+  }
+
+  .select-container {
+    order: 2;
+  }
+
+  .footer-icons {
+    order: 3;
+  }
+
+  .subscribe-section {
+    order: 4;
+  }
+
+  .footer-end {
+    order: 5;
+  }
+}
