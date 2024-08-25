@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rem;
+  padding-bottom: 6rem;
+}
+
+.text-subheading2 {
+  font-size: 1rem;
+  line-height: 1.625rem;
+  color: var(--neutral-900);
+  text-align: center;
+  max-width: 882px;
+}
+
+.heading-1-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
