@@ -1,0 +1,27 @@
+<div class="container">
+  <h5>Sign In</h5>
+  <span>Welcome back</span>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <div class="form__control">
+      <label [class.invalid]="name?.invalid && name?.touched" for="name">User name</label>
+      <input type="text" id="name" placeholder="Enter email" formControlName="{{ formFields.name }}" required />
+      <img src="login/profile.svg" class="icon left" [class.invalid]="name?.invalid && name?.touched" alt="user" />
+      <div *ngIf="name?.invalid && name?.touched" id="nameErrorMessage" class="validation-error">
+        Name is required.
+      </div>
+    </div>
+    <div class="form__control">
+      <label [class.invalid]="password?.invalid && password?.touched" for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" formControlName="{{ formFields.password }}"
+        required [appPasswordToggle]="password" />
+      <img src="login/lock.svg" class="icon left" [class.invalid]="password?.invalid && password?.touched" alt="password" />
+      <div *ngIf="password?.invalid && password?.touched" id="passwordErrorMessage" class="validation-error">Password is
+        required.</div>
+    </div>
+    <app-button type="submit" class="button" width="full">Sign In</app-button>
+    <div class="or">OR</div>
+    <div class="form__text">
+      Don't have an account? <a routerLink="/join" class="link">Sign up</a>
+    </div>
+  </form>
+</div>

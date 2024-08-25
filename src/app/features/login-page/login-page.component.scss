@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 11.5rem 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form__control {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  position: relative;
+
+  input {
+    min-width: calc(360px - 2rem);
+    height: 2.75rem;
+    padding-left: 2.75rem;
+  }
+
+  .icon {
+    position: absolute;
+    top: 2.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    filter: var(--filter-neutral-900);
+
+    &.left {
+      left: 1rem;
+    }
+
+    &.right {
+      right: 1rem;
+    }
+
+    &.invalid {
+      filter: var(--filter-color-1-500);
+    }
+  }
+
+  label {
+    font-weight: 700;
+
+    &.invalid {
+      color: var(--color-1-500);
+    }
+  }
+
+  :disabled+.icon,
+  :disabled+.icon+.icon {
+    filter: var(--filter-neutral-400);
+  }
+
+  .validation-error {
+    font-size: 0.875rem;
+    line-height: 1.75rem;
+    color: var(--danger-600);
+  }
+}
+
+.button {
+  width: 100%;
+}
+
+
+.or {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: var(--neutral-550);
+}
+
+.form__text {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--neutral-900);
+}
+
+.link {
+  font-weight: 700;
+  color: var(--primary-500);
+}
