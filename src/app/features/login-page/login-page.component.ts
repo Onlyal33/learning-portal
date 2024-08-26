@@ -1,7 +1,6 @@
 import { NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -28,13 +27,13 @@ import { LoginFormFields } from '../../shared/enums/user-forms.enum';
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   readonly formFields = LoginFormFields;
   loginForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private router: Router /* private authService: AuthService */
+    private router: Router /* private authService: AuthService */,
   ) {}
 
   ngOnInit(): void {

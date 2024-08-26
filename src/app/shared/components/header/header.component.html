@@ -1,19 +1,52 @@
-<div class="collapsible-menu-button" (click)="toggleMenu()">
+<div
+  class="collapsible-menu-button"
+  (click)="toggleMenu()"
+  (keyup)="toggleMenu()"
+  tabindex="0"
+>
   <img src="menu-8.svg" alt=" Menu" class="icon" />
 </div>
-<div class="container" (click)="onLogoClick()">
+<div
+  class="container"
+  (click)="onLogoClick()"
+  (keyup)="toggleMenu()"
+  tabindex="0"
+>
   <img src="logo.png" alt="Logo" />
   <h1 class="text">learn</h1>
 </div>
 <nav class="header-menu">
   <ul class="header-menu-list">
-    <li class="header-menu-item"><a routerLink="/blog" routerLinkActive="active" ariaCurrentWhenActive="page">Blog</a></li>
-    <li class="header-menu-item"><a routerLink="/pricing" routerLinkActive="active" ariaCurrentWhenActive="page">Pricing</a></li>
-    <li class="header-menu-item"><a routerLink="/about" routerLinkActive="active" ariaCurrentWhenActive="page">About us</a></li>
+    <li class="header-menu-item">
+      <a
+        routerLink="/blog"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >Blog</a
+      >
+    </li>
+    <li class="header-menu-item">
+      <a
+        routerLink="/pricing"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >Pricing</a
+      >
+    </li>
+    <li class="header-menu-item">
+      <a
+        routerLink="/about"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        >About us</a
+      >
+    </li>
   </ul>
 </nav>
 <div class="buttons">
-  <app-button (click)="onSignInButtonClick()" size="sm" variant="primary-light">Sign in</app-button>
+  <app-button (click)="onSignInButtonClick()" size="sm" variant="primary-light"
+    >Sign in</app-button
+  >
   <app-button (click)="onJoinButtonClick()" size="sm">Join us</app-button>
 </div>
 <div class="collapsible-menu" *ngIf="isMenuOpen">

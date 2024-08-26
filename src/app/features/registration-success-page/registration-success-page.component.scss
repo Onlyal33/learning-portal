@@ -5,7 +5,6 @@
   align-items: center;
   gap: 2.5rem;
   padding: 6rem 8.25rem;
-
 }
 
 .subheading {
@@ -26,10 +25,10 @@ $size: 4.5rem;
 
   .image {
     position: absolute;
-    width: $size * 4 / 6;
-    height: $size * 4 / 6;
-    top: $size / 6;
-    left: $size / 6;
+    width: calc($size * 4 / 6);
+    height: calc($size * 4 / 6);
+    top: calc($size / 6);
+    left: calc($size / 6);
   }
 }
 

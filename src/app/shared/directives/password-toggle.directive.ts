@@ -1,11 +1,11 @@
-import { Directive, ElementRef, Input, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 @Directive({
-    selector: '[appPasswordToggle]',
-    standalone: true
+  selector: '[appPasswordToggle]',
+  standalone: true,
 })
-export class PasswordToggleDirective {
+export class PasswordToggleDirective implements OnInit {
   private iconShow!: HTMLImageElement;
   private iconHide!: HTMLImageElement;
   @Input('appPasswordToggle') control!: FormControl | null;
@@ -22,19 +22,21 @@ export class PasswordToggleDirective {
   }
 
   private cretateIcons(): void {
-    this.control = this.control || this.ngControl.control as FormControl;
+    this.control = this.control || (this.ngControl.control as FormControl);
 
     const iconShow = this.renderer.createElement('img');
     this.renderer.setProperty(iconShow, 'src', 'login/view.svg');
     this.renderer.addClass(iconShow, 'input-wicon-icon');
 
-
     const iconHide = this.renderer.createElement('img');
     this.renderer.setProperty(iconHide, 'src', 'login/hide.svg');
     this.renderer.addClass(iconHide, 'input-wicon-icon');
 
-    this.control.statusChanges.subscribe(status => {
-      if (this.control?.invalid && (this.control.dirty || this.control.touched)) {
+    this.control.statusChanges.subscribe(() => {
+      if (
+        this.control?.invalid &&
+        (this.control.dirty || this.control.touched)
+      ) {
         this.renderer.addClass(iconHide, 'invalid');
         this.renderer.addClass(iconShow, 'invalid');
       } else {
@@ -69,7 +71,7 @@ export class PasswordToggleDirective {
     this.renderer.setProperty(
       input,
       'type',
-      input.type === 'password' ? 'text' : 'password'
+      input.type === 'password' ? 'text' : 'password',
     );
 
     this.appendIcon(button);
@@ -77,9 +79,7 @@ export class PasswordToggleDirective {
 
   appendIcon(button: HTMLButtonElement): void {
     const icon =
-      this.el.nativeElement.type === 'password'
-        ? this.iconShow
-        : this.iconHide;
+      this.el.nativeElement.type === 'password' ? this.iconShow : this.iconHide;
 
     this.renderer.setProperty(button, 'innerHTML', '');
     this.renderer.appendChild(button, icon);

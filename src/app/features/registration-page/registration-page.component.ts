@@ -1,5 +1,5 @@
 import { NgFor, NgIf, NgOptimizedImage } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -30,17 +30,19 @@ import {
   templateUrl: './registration-page.component.html',
   styleUrl: './registration-page.component.scss',
 })
-export class RegistrationPageComponent {
+export class RegistrationPageComponent implements OnInit {
   registrationForm!: FormGroup;
   formType!: 'student' | 'trainer';
-  formFields!: typeof studentRegistrationFormFieldsArray | typeof trainerRegistrationFormFieldsArray;
+  formFields!:
+    | typeof studentRegistrationFormFieldsArray
+    | typeof trainerRegistrationFormFieldsArray;
   src!: string;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
-     /* private authService: AuthService */
+    private route: ActivatedRoute,
+    /* private authService: AuthService */
   ) {}
 
   ngOnInit(): void {
@@ -48,13 +50,14 @@ export class RegistrationPageComponent {
   }
 
   private buildForm(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.formType = params['type'];
     });
 
-    this.formFields = this.formType === 'student'
-    ? studentRegistrationFormFieldsArray
-    : trainerRegistrationFormFieldsArray;
+    this.formFields =
+      this.formType === 'student'
+        ? studentRegistrationFormFieldsArray
+        : trainerRegistrationFormFieldsArray;
     this.src = `registration/reg-${this.formType}s.jpg`;
 
     this.registrationForm = this.fb.group(
@@ -63,8 +66,8 @@ export class RegistrationPageComponent {
           ...acc,
           [field.name]: field.required ? ['', Validators.required] : [''],
         }),
-        {}
-      )
+        {},
+      ),
     );
 
     this.formFields.forEach((field) => {

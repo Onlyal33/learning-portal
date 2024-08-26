@@ -1,22 +1,54 @@
 <div class="container">
   <div class="heading-container">
-  <h2>Registration</h2>
-  <span class="subheading">{{ formType === 'student' ? "Student" : "Trainer" }}</span>
-</div>
-<div class="form-container">
-<img [ngSrc]="src" width="451" height="625" class="image" priority />
+    <h2>Registration</h2>
+    <span class="subheading">{{
+      formType === "student" ? "Student" : "Trainer"
+    }}</span>
+  </div>
+  <div class="form-container">
+    <img
+      [ngSrc]="src"
+      width="451"
+      height="625"
+      class="image"
+      alt="some people"
+      priority
+    />
 
-  <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
-    <div *ngFor="let field of formFields" class="form__control">
-      <label [for]="field.name" [class.invalid]="registrationForm.get(field.name)?.invalid && registrationForm.get(field.name)?.touched">{{ field.label }}</label>
-      <input [id]="field.name" [formControlName]="field.name" [type]="field.type || 'text'" />
-      <div *ngIf="registrationForm.get(field.name)?.invalid && registrationForm.get(field.name)?.touched">
-        <div *ngIf="registrationForm.get(field.name)?.errors?.['required']" class="validation-error">
-          {{ field.label }} is required.
+    <form
+      [formGroup]="registrationForm"
+      (ngSubmit)="onSubmit()"
+      class="registration-form"
+    >
+      <div *ngFor="let field of formFields" class="form__control">
+        <label
+          [for]="field.name"
+          [class.invalid]="
+            registrationForm.get(field.name)?.invalid &&
+            registrationForm.get(field.name)?.touched
+          "
+          >{{ field.label }}</label
+        >
+        <input
+          [id]="field.name"
+          [formControlName]="field.name"
+          [type]="field.type || 'text'"
+        />
+        <div
+          *ngIf="
+            registrationForm.get(field.name)?.invalid &&
+            registrationForm.get(field.name)?.touched
+          "
+        >
+          <div
+            *ngIf="registrationForm.get(field.name)?.errors?.['required']"
+            class="validation-error"
+          >
+            {{ field.label }} is required.
+          </div>
         </div>
       </div>
-    </div>
-    <app-button type="submit" width="full" class="button">Submit</app-button>
-  </form>
-</div>
+      <app-button type="submit" width="full" class="button">Submit</app-button>
+    </form>
+  </div>
 </div>
