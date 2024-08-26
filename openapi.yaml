@@ -1,0 +1,276 @@
+---
+openapi: "3.0.1"
+info:
+  title: "JuniorX"
+  version: "v1"
+  description: REST API Specs for the final project of JuniorX Program
+  contact:
+    name: Said Akhmed Agitaev
+    email: said_akhmed_agitaev@epam.com
+servers:
+  - url: "http://api.example.com"
+paths:
+  /auth/login:
+    post:
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - "email"
+                - "password"
+              type: "object"
+              properties:
+                email:
+                  type: "string"
+                password:
+                  type: "string"
+              additionalProperties: false
+      responses:
+        "200":
+          description: "Successfully logged in"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Something went wrong"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - Auth
+  /auth/logout:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: "Logout user"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - Auth
+  /auth/register:
+    post:
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - "email"
+                - "password"
+              type: "object"
+              properties:
+                email:
+                  type: "string"
+                password:
+                  type: "string"
+              additionalProperties: false
+            examples:
+              example:
+                value:
+                  "{\n    \"email\": \"email@home.com\",\n    \"password\": \"\
+                  supersecret\"\n}"
+      responses:
+        "200":
+          description: "Registered user"
+      tags:
+        - Auth
+  /users/me:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: "Logged in user with full user info"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - User
+    delete:
+      parameters: []
+      responses:
+        "204":
+          description: "Account deleted successfully"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - User
+  /users/upload-photo:
+    post:
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - "data"
+              type: "object"
+              properties:
+                data:
+                  type: "string"
+              additionalProperties: false
+      responses:
+        "200":
+          description: "Successfully uploaded user avatar"
+        "400":
+          description: "Unable to upload user photo"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - User
+  /users/update-password:
+    put:
+      parameters: []
+      responses:
+        "200":
+          description: "Successfully updated password"
+        "400":
+          description: "Unable to update password"
+      security:
+        - BasicAuthCredentials: []
+      tags:
+        - User
+  /trainings:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: "List of trainings"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Training"
+      tags:
+        - Training
+    post:
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Training"
+      responses:
+        "200":
+          description: "Training details"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Training"
+      tags:
+        - Training
+  /trainings/search:
+    get:
+      parameters: []
+      responses:
+        "200":
+          description: "Search trainings by trainer name, specialization and date (in timestamps)"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Training"
+      tags:
+        - Training
+
+components:
+  securitySchemes:
+    BasicAuthCredentials:
+      type: "http"
+      scheme: "basic"
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          example: john_doe@example.com
+        photo:
+          type: string
+          example: http://u.rl/to/my/photo
+        password:
+          type: string
+          example: topsecret
+        isActive:
+          type: boolean
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        dateOfBirth:
+          type: string
+        address:
+          type: string
+    Trainer:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        specializationId:
+          type: string
+    Specialization:
+      type: object
+      properties:
+        id:
+          type: string
+        specialization:
+          type: string
+    TrainingType:
+      type: object
+      properties:
+        id:
+          type: string
+        trainingType:
+          type: string
+    Training:
+      type: object
+      properties:
+        id:
+          type: string
+        studentId:
+          type: string
+        trainerId:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/TrainingType"
+        date:
+          type: string
+        duration:
+          type: integer
+        description:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+        message:
+          type: string
