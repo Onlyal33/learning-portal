@@ -9,12 +9,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Profile } from '../../models/user.model';
+import { UserStoreService } from '../../../user/services/user-store.service';
+import { GetUserResponse } from '../../../../../server/user-service/models/user.model';
 
 interface ProfileInfo {
   labelText: string;
   label: string;
-  value: string;
+  value: string | boolean;
   required: boolean;
   type: 'text' | 'date';
 }
@@ -48,7 +49,8 @@ const getlabelText = function getlabelText(label: string): string {
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {
-  profile: Profile = {
+  profile!: GetUserResponse;
+  /*   profile: Profile = {
     id: '1',
     firstName: 'Marta',
     lastName: 'Black',
@@ -60,18 +62,30 @@ export class ProfileComponent implements OnInit {
     userId: '1',
     dateOfBirth: '01.01.2001',
     address: '123 Main St, Anytown, USA',
-  };
+  }; */
   profileInfo!: ProfileInfo[];
   profileForm!: FormGroup;
   editMode = false;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private userStoreService: UserStoreService,
+  ) {}
 
   ngOnInit(): void {
     this.initializeForm();
   }
 
   initializeForm(): void {
+    this.userStoreService.user$.subscribe({
+      next: (user) => {
+        this.profile = user;
+      },
+      error: (error) => {
+        console.error('Error fetching user data:', error);
+      },
+    });
+
     this.profileInfo = Object.entries(this.profile)
       .filter(
         ([key]) =>
@@ -118,7 +132,8 @@ export class ProfileComponent implements OnInit {
 
   saveProfile(): void {
     if (this.profileForm.valid) {
-      this.profile = { ...this.profile, ...this.profileForm.value };
+      this.userStoreService.updateUser(this.profileForm.value);
+      //this.profile = { ...this.profile, ...this.profileForm.value };
       this.toggleEditMode();
     }
   }

@@ -43,7 +43,7 @@
     </li>
   </ul>
 </nav>
-<div class="buttons">
+<div class="buttons" *ngIf="!isAuthorised">
   <app-button (click)="onSignInButtonClick()" size="sm" variant="primary-light"
     >Sign in</app-button
   >
@@ -51,8 +51,12 @@
 </div>
 <div class="collapsible-menu" *ngIf="isMenuOpen">
   <ul class="sidebar-menu">
-    <li class="sidebar-menu-item"><a routerLink="/">Sign in</a></li>
-    <li class="sidebar-menu-item"><a routerLink="/">Join us</a></li>
+    <li *ngIf="!isAuthorised" class="sidebar-menu-item">
+      <a routerLink="/">Sign in</a>
+    </li>
+    <li *ngIf="!isAuthorised" class="sidebar-menu-item">
+      <a routerLink="/">Join us</a>
+    </li>
     <li class="sidebar-menu-item"><a routerLink="/blog">Blog</a></li>
     <li class="sidebar-menu-item"><a routerLink="/pricing">Pricing</a></li>
     <li class="sidebar-menu-item"><a routerLink="/about">About us</a></li>

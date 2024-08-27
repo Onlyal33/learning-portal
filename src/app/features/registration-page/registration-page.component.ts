@@ -14,6 +14,7 @@ import {
   studentRegistrationFormFieldsArray,
   trainerRegistrationFormFieldsArray,
 } from '../../shared/enums/user-forms.enum';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-registration-page',
@@ -42,7 +43,7 @@ export class RegistrationPageComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    /* private authService: AuthService */
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -83,12 +84,7 @@ export class RegistrationPageComponent implements OnInit {
     this.registrationForm.markAllAsTouched();
 
     if (this.registrationForm.valid) {
-      this.router.navigate(['/registration-success']);
-      console.log(this.registrationForm.value);
-      /*       this.authService.login({
-        name: this.loginForm.value[this.formFields.name],
-        password: this.loginForm.value[this.formFields.password],
-      }); */
+      this.authService.register(this.registrationForm.value);
     }
   }
 }

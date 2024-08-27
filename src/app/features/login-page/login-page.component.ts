@@ -12,6 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
 import { LoginFormFields } from '../../shared/enums/user-forms.enum';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -33,7 +34,8 @@ export class LoginPageComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router /* private authService: AuthService */,
+    private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -59,12 +61,10 @@ export class LoginPageComponent implements OnInit {
     this.loginForm.markAllAsTouched();
 
     if (this.loginForm.valid) {
-      this.router.navigate(['/account']);
-      console.log(this.loginForm.value);
-      /*       this.authService.login({
-        name: this.loginForm.value[this.formFields.name],
+      this.authService.login({
+        username: this.loginForm.value[this.formFields.name],
         password: this.loginForm.value[this.formFields.password],
-      }); */
+      });
     }
   }
 }

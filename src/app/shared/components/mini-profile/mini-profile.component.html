@@ -1,0 +1,20 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <img [src]="profile.photo" alt="Profile Picture" class="profile-pic" />
+    <div class="profile-info">
+      <span class="value">{{ profile.username }}</span>
+      <span class="value">{{ profile.email }}</span>
+    </div>
+  </div>
+  <div class="profile-info">
+    <a
+      class="label"
+      routerLink="/account"
+      routerLinkActive=""
+      ariaCurrentWhenActive="page"
+      >My account</a
+    >
+    <div class="label">Night mode</div>
+    <a class="label" routerLink="/" routerLinkActive="">Sign out</a>
+  </div>
+</div>

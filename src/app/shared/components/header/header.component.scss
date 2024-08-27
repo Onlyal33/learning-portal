@@ -98,7 +98,12 @@
 .icon {
   width: 1.5rem;
   height: 1.5rem;
-  filter: brightness(0) saturate(100%) invert(33%) sepia(59%) saturate(1325%) hue-rotate(220deg) brightness(96%) contrast(95%);
+  filter: brightness(0) saturate(100%) invert(33%) sepia(59%) saturate(1325%)
+    hue-rotate(220deg) brightness(96%) contrast(95%);
+}
+
+.active {
+  color: var(--primary-500);
 }
 
 .sidebar-menu {

@@ -1,4 +1,4 @@
-service: my-serverless-app
+service: learning-app-cloudfront
 frameworkVersion: "3"
 
 provider:
@@ -12,8 +12,8 @@ plugins:
 custom:
   ## Serverless-finch configuration
   client:
-    bucketName: learning-app-cloudfront-50342116
-    distributionFolder: dist/app/browser
+    bucketName: learning-app-cloudfront-50342117
+    distributionFolder: dist/learning-portal/browser
     indexDocument: index.html
     manageResources: false
   ## Serverless-single-page-app-plugin configuration:
