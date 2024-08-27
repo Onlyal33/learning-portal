@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ESNext"],
+    "esModuleInterop": true,
+    "noEmit": false,
+    "allowArbitraryExtensions": true,
+    "allowJs": true,
+    "types": ["jest", "node"],
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "rootDir": "./",
+    "outDir": ".build"
+  },
+  "exclude": ["node_modules", ".build"]
+}

@@ -1,0 +1,435 @@
+service: user-service
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: dev
+  region: us-east-1
+  environment:
+    REGION: ${self:provider.region}
+    USER_TABLE: UserTable
+    STUDENT_TABLE: StudentTable
+    TRAINER_TABLE: TrainerTable
+    SPECIALIZATION_TABLE: SpecializationTable
+    BLACKLISTED_TOKENS_TABLE: BlacklistedTokensTable
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:${self:provider.region}:*:table/UserTable
+            - arn:aws:dynamodb:${self:provider.region}:*:table/StudentTable
+            - arn:aws:dynamodb:${self:provider.region}:*:table/TrainerTable
+            - arn:aws:dynamodb:${self:provider.region}:*:table/SpecializationTable
+            - arn:aws:dynamodb:${self:provider.region}:*:table/BlacklistedTokensTable
+  httpApi:
+    cors: true
+    authorizers:
+      customLambdaAuthorizer:
+        type: request
+        functionName: jwtAuthorizer
+
+custom:
+  handlerPath: .
+
+functions:
+  jwtAuthorizer:
+    handler: ${self:custom.handlerPath}/index.jwtAuthorizer
+  registerUser:
+    handler: ${self:custom.handlerPath}/index.registerUser
+    events:
+      - httpApi:
+          path: /auth/register
+          method: post
+  loginUser:
+    handler: ${self:custom.handlerPath}/index.loginUser
+    events:
+      - httpApi:
+          path: /auth/login
+          method: post
+  logoutUser:
+    handler: ${self:custom.handlerPath}/index.logoutUser
+    events:
+      - httpApi:
+          path: /auth/logout
+          method: get
+          authorizer:
+            name: customLambdaAuthorizer
+            type: request
+  getCurrentUser:
+    handler: ${self:custom.handlerPath}/index.getCurrentUser
+    events:
+      - httpApi:
+          path: /users/me
+          method: get
+          authorizer:
+            name: customLambdaAuthorizer
+            type: request
+  deleteCurrentUser:
+    handler: ${self:custom.handlerPath}/index.deleteCurrentUser
+    events:
+      - httpApi:
+          path: /users/me
+          method: delete
+          authorizer:
+            name: customLambdaAuthorizer
+            type: request
+  updateCurrentUser:
+    handler: ${self:custom.handlerPath}/index.updateCurrentUser
+    events:
+      - httpApi:
+          path: /users/me
+          method: put
+          authorizer:
+            name: customLambdaAuthorizer
+            type: request
+  updatePassword:
+    handler: ${self:custom.handlerPath}/index.updatePassword
+    events:
+      - httpApi:
+          path: /users/update-password
+          method: put
+          authorizer:
+            name: customLambdaAuthorizer
+            type: request
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
+    UserTableReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${UserTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+    UserTableReadCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: UserTableReadCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref UserTableReadCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+    UserTableWriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${UserTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    UserTableWriteCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: UserTableWriteCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref UserTableWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    StudentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: StudentTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
+
+    StudentTableReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${StudentTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+    StudentTableReadCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: StudentTableReadCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref StudentTableReadCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+    StudentTableWriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${StudentTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    StudentTableWriteCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: StudentTableWriteCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref StudentTableWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    TrainerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TrainerTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    TrainerTableReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${TrainerTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+    TrainerTableReadCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: TrainerTableReadCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref TrainerTableReadCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+    TrainerTableWriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${TrainerTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    TrainerTableWriteCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: TrainerTableWriteCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref TrainerTableWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    SpecializationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SpecializationTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    SpecializationTableReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${SpecializationTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+    SpecializationTableReadCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: SpecializationTableReadCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref SpecializationTableReadCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+    SpecializationTableWriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${SpecializationTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    SpecializationTableWriteCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: SpecializationTableWriteCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref SpecializationTableWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    BlacklistedTokensTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "BlacklistedTokensTable"
+        AttributeDefinitions:
+          - AttributeName: "token"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "token"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: "expiresAt"
+          Enabled: true
+
+    BlacklistedTokensTableReadCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${BlacklistedTokensTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:ReadCapacityUnits
+        ServiceNamespace: dynamodb
+
+    BlacklistedTokensTableReadCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: BlacklistedTokensTableReadCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref BlacklistedTokensTableReadCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBReadCapacityUtilization
+
+    BlacklistedTokensTableWriteCapacityScalableTarget:
+      Type: AWS::ApplicationAutoScaling::ScalableTarget
+      Properties:
+        MaxCapacity: 10
+        MinCapacity: 1
+        ResourceId: !Sub "table/${BlacklistedTokensTable}"
+        RoleARN: !GetAtt DynamoDBAutoscaleRole.Arn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    BlacklistedTokensTableWriteCapacityScalingPolicy:
+      Type: AWS::ApplicationAutoScaling::ScalingPolicy
+      Properties:
+        PolicyName: BlacklistedTokensTableWriteCapacityScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId: !Ref BlacklistedTokensTableWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 70.0
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    DynamoDBAutoscaleRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: application-autoscaling.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: DynamoDBAutoscalePolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:UpdateTable
+                    - cloudwatch:PutMetricAlarm
+                    - cloudwatch:DescribeAlarms
+                    - cloudwatch:GetMetricStatistics
+                    - cloudwatch:SetAlarmState
+                    - cloudwatch:DeleteAlarms
+                  Resource: "*"
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dotenv-plugin
