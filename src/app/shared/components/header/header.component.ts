@@ -28,20 +28,14 @@ export class HeaderComponent {
 
   onJoinButtonClick(): void {
     this.router.navigate(['/join']);
-    /*     if (this.authService.isAuthorised) {
-      this.authService.logout();
-    } else {
-      this.router.navigate(['/login']);
-    }*/
   }
 
   onSignInButtonClick(): void {
-    this.router.navigate(['/login']);
-    /*     if (this.authService.isAuthorised) {
+    if (this.authService.isAuthorised) {
       this.authService.logout();
     } else {
       this.router.navigate(['/login']);
-    }*/
+    }
   }
 
   get isAuthorised(): boolean {

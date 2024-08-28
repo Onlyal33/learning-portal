@@ -32,9 +32,8 @@ export class AuthService {
       .post<RegistrationResponse>(`${this.apiUrl}/auth/register`, user)
       .subscribe({
         next: (res) => {
-          this.login(res, true);
           this.secureDataService.setPassword(res.password);
-          this.router.navigate(['/registration-success']);
+          this.login({ email: res.username, password: res.password }, true);
         },
         error: (error) => {
           console.error('Registration failed:', error);
@@ -52,6 +51,8 @@ export class AuthService {
           this.isAuthorised = true;
           if (!isFirstAuth) {
             this.router.navigate(['/home']);
+          } else {
+            this.router.navigate(['/registration-success']);
           }
         }
       },
@@ -64,7 +65,7 @@ export class AuthService {
 
   logout(): void {
     this.http
-      .delete(`${this.apiUrl}/auth/logout`, {
+      .get(`${this.apiUrl}/auth/logout`, {
         observe: 'response',
       })
       .subscribe({
@@ -83,6 +84,7 @@ export class AuthService {
   }
 
   get isAuthorised(): boolean {
+    console.log('AuthService: isAuthorised', this.isAuthorized$$.value);
     return this.isAuthorized$$.value;
   }
 

@@ -4,7 +4,7 @@ import {
   UpdateItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 

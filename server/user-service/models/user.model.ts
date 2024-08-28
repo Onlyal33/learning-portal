@@ -39,18 +39,14 @@ export interface ErrorResponse {
 }
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
-export interface RegistrationRequest {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  student?: StudentWithoutIds;
-  trainer?: TrainerWithoutIds;
-}
+export type RegistrationRequest = Omit<
+  UserWithoutIdPasswordPhoto,
+  'isActive'
+> & { role: 'trainer' | 'student' } & (StudentWithoutIds | TrainerWithoutIds);
 
 export type UpdateUserRequest =
   | (StudentWithoutIds & UserWithoutIdPasswordPhoto)

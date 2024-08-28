@@ -62,7 +62,7 @@ export class LoginPageComponent implements OnInit {
 
     if (this.loginForm.valid) {
       this.authService.login({
-        username: this.loginForm.value[this.formFields.name],
+        email: this.loginForm.value[this.formFields.name],
         password: this.loginForm.value[this.formFields.password],
       });
     }

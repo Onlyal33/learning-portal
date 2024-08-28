@@ -1,7 +1,7 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 
@@ -11,6 +11,17 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const loginUser: APIGatewayProxyHandler = async (event) => {
   const { email, password } = JSON.parse(event.body);
+
+  if (!email || !password) {
+    console.log(event.body);
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        errorCode: 400,
+        message: 'Required data is missing',
+      }),
+    };
+  }
 
   const params = {
     TableName: process.env.USER_TABLE,

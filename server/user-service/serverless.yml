@@ -26,6 +26,7 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - arn:aws:dynamodb:${self:provider.region}:*:table/UserTable
+            - arn:aws:dynamodb:us-east-1:590184018536:table/UserTable/index/email-index
             - arn:aws:dynamodb:${self:provider.region}:*:table/StudentTable
             - arn:aws:dynamodb:${self:provider.region}:*:table/TrainerTable
             - arn:aws:dynamodb:${self:provider.region}:*:table/SpecializationTable
@@ -433,3 +434,4 @@ resources:
 plugins:
   - serverless-plugin-typescript
   - serverless-dotenv-plugin
+  - serverless-offline

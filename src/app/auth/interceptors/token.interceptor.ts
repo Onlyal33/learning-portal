@@ -18,6 +18,7 @@ export const tokenInterceptor: HttpInterceptorFn = (
 
   if (authService.isAuthorised) {
     const token = inject(SessionStorageService).getToken();
+    console.log('token', token);
     if (token) {
       req = req.clone({
         headers: req.headers.set('Authorization', token),

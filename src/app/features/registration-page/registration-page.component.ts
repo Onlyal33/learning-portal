@@ -84,7 +84,10 @@ export class RegistrationPageComponent implements OnInit {
     this.registrationForm.markAllAsTouched();
 
     if (this.registrationForm.valid) {
-      this.authService.register(this.registrationForm.value);
+      this.authService.register({
+        ...this.registrationForm.value,
+        role: this.formType,
+      });
     }
   }
 }

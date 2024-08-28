@@ -45,10 +45,11 @@ const jwtAuthorizer = async (
   }
 
   try {
-    const authorizationToken = event.headers.authorization;
+    const authorizationToken =
+      event.headers['authorization'] || event.headers['Authorization'];
 
     if (!authorizationToken) {
-      cb('Unauthorized');
+      cb('Unauthorized: No authorization token');
       return;
     }
 

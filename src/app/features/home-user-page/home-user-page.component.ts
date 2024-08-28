@@ -23,6 +23,11 @@ export class HomeUserPageComponent {
   }
 
   get firstName(): Observable<string> {
-    return this.userStoreService.user$.pipe(map((user) => user.firstName));
+    return this.userStoreService.user$.pipe(
+      map((user) => {
+        console.log('HomeUserPageComponent: map', user);
+        return user.firstName;
+      }),
+    );
   }
 }

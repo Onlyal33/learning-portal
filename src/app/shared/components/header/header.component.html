@@ -43,11 +43,16 @@
     </li>
   </ul>
 </nav>
-<div class="buttons" *ngIf="!isAuthorised">
-  <app-button (click)="onSignInButtonClick()" size="sm" variant="primary-light"
-    >Sign in</app-button
+<div class="buttons">
+  <app-button
+    (click)="onSignInButtonClick()"
+    size="sm"
+    variant="primary-light"
+    >{{ isAuthorised ? "Sign out" : "Sign in" }}</app-button
   >
-  <app-button (click)="onJoinButtonClick()" size="sm">Join us</app-button>
+  <app-button *ngIf="!isAuthorised" (click)="onJoinButtonClick()" size="sm"
+    >Join us</app-button
+  >
 </div>
 <div class="collapsible-menu" *ngIf="isMenuOpen">
   <ul class="sidebar-menu">
