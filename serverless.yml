@@ -74,7 +74,7 @@ resources:
               Id: myS3Origin
               ## In case you don't want to restrict the bucket access use CustomOriginConfig and remove S3OriginConfig
               S3OriginConfig:
-                OriginAccessIdentity: ''
+                OriginAccessIdentity: ""
               # CustomOriginConfig:
               #   HTTPPort: 80
               #   HTTPSPort: 443
@@ -91,6 +91,9 @@ resources:
           ## The only exception are files that actually exist e.h. app.js, reset.css
           CustomErrorResponses:
             - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+            - ErrorCode: 403
               ResponseCode: 200
               ResponsePagePath: /index.html
           DefaultCacheBehavior:
