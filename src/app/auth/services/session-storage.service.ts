@@ -20,4 +20,8 @@ export class SessionStorageService {
   deleteToken(): void {
     this.window.sessionStorage.removeItem(TOKEN);
   }
+
+  hasToken(): boolean {
+    return !!this.window.sessionStorage.getItem(TOKEN);
+  }
 }

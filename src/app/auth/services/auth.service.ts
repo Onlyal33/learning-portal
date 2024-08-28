@@ -25,7 +25,14 @@ export class AuthService {
     private sessionStorageService: SessionStorageService,
     private router: Router,
     private secureDataService: SecureDataService,
-  ) {}
+  ) {
+    this.initializeIsAuthorized();
+  }
+
+  private initializeIsAuthorized(): void {
+    const isTokenPresent = this.sessionStorageService.hasToken();
+    this.isAuthorized$$.next(isTokenPresent);
+  }
 
   register(user: RegistrationRequest): void {
     this.http
