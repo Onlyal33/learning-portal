@@ -43,22 +43,25 @@ resources:
           Ref: WebAppS3Bucket
         PolicyDocument:
           Statement:
-            - Sid: "AllowCloudFrontAccessIdentity"
+            - Sid: "AllowCloudFrontAccess"
               Effect: Allow
               Action: s3:GetObject
               Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
               Principal:
-                AWS:
-                  Fn::Join:
-                    - " "
-                    - - "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity"
-                      - !Ref OriginAccessIdentity
+                Service: cloudfront.amazonaws.com
+              Condition:
+                StringEquals:
+                  AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebAppCloudFrontDistribution}
 
-    OriginAccessIdentity:
-      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    WebAppCloudFrontOriginAccessControl:
+      Type: AWS::CloudFront::OriginAccessControl
       Properties:
-        CloudFrontOriginAccessIdentityConfig:
-          Comment: Access identity between CloudFront and S3 bucket
+        OriginAccessControlConfig:
+          Name: WebAppOAC
+          Description: Access control for CloudFront to access S3 bucket
+          SigningProtocol: sigv4
+          SigningBehavior: always
+          OriginAccessControlOriginType: s3
 
     ## Specifying the CloudFront Distribution to server your Web Application
     WebAppCloudFrontDistribution:
@@ -71,11 +74,12 @@ resources:
               Id: myS3Origin
               ## In case you don't want to restrict the bucket access use CustomOriginConfig and remove S3OriginConfig
               S3OriginConfig:
-                OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+                OriginAccessIdentity: ''
               # CustomOriginConfig:
               #   HTTPPort: 80
               #   HTTPSPort: 443
               #   OriginProtocolPolicy: https-only
+              OriginAccessControlId: !GetAtt WebAppCloudFrontOriginAccessControl.Id
           Enabled: true
           IPV6Enabled: true
           HttpVersion: http2
