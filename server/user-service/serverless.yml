@@ -186,6 +186,8 @@ resources:
 
     UserTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: UserTable
         AttributeDefinitions:
@@ -230,6 +232,8 @@ resources:
 
     TrainerTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: TrainerTable
         AttributeDefinitions:
@@ -245,6 +249,8 @@ resources:
 
     SpecializationTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: SpecializationTable
         AttributeDefinitions:
@@ -260,6 +266,8 @@ resources:
 
     BlacklistedTokensTable:
       Type: "AWS::DynamoDB::Table"
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: "BlacklistedTokensTable"
         AttributeDefinitions:

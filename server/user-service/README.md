@@ -100,9 +100,18 @@ closed as unauthorized.
 
 All five DynamoDB tables use fixed provisioned capacity of 1 RCU and 1 WCU.
 The retained `UserTable` `email-index` is also fixed at 1 RCU and 1 WCU. The
-template contains no Application Auto Scaling targets or policies, so it does
+tables use `DeletionPolicy: Retain` and `UpdateReplacePolicy: Retain`, so stack
+deletion or table replacement does not delete their data.
+The template contains no Application Auto Scaling targets or policies, so it does
 not create their associated CloudWatch alarms. `StudentTable` and `TrainerTable`
 do not define the runtime-unused `userId-index`.
+
+Retention does not preserve CloudFormation ownership after stack deletion. Do
+not run `sls remove` and then attempt a normal redeploy: the five fixed table
+names will collide with the preserved tables. Use the repository-level
+[retained-resource recovery and replacement runbook](../../docs/retained-resource-recovery.md)
+to import all five tables under `user-service-dev` before deployment, or to stage
+a no-data-loss replacement migration.
 
 This configuration is deliberately optimized for a near-idle study project.
 Sustained traffic can throttle rather than scale. Remaining within a free
@@ -133,6 +142,7 @@ Release in this order:
    canonical-email collisions, reserved-key collisions, duplicate/missing
    profiles, cross-role ambiguity, and orphan profiles. It creates the plan with
    mode `0600` and refuses to overwrite an existing file.
+
 3. Review the exact table names, operations, and printed SHA-256 digest. With
    the write freeze still active, apply only that reviewed plan:
 
@@ -147,6 +157,7 @@ Release in this order:
    Each user is updated transactionally with an owned email claim. The process
    is retry-safe and rescans all three tables after applying; any remaining
    operation fails the command.
+
 4. Inspect the deployed stack before applying the final Serverless template.
    The change removes all DynamoDB target-tracking resources and the unused
    Student/Trainer `userId-index` definitions while retaining the fixed-capacity

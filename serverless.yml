@@ -15,9 +15,6 @@ custom:
     distributionFolder: dist/learning-portal/browser
     indexDocument: index.html
     manageResources: false
-  ## Serverless-single-page-app-plugin configuration:
-  s3LocalPath: ${self:custom.client.distributionFolder}/
-  s3BucketName: ${self:custom.client.bucketName}
 
 # you can add CloudFormation resource templates here
 resources:
@@ -25,8 +22,10 @@ resources:
     ## Specifying the S3 Bucket
     WebAppS3Bucket:
       Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
-        BucketName: ${self:custom.s3BucketName}
+        BucketName: ${self:custom.client.bucketName}
         # AccessControl: PublicRead
         WebsiteConfiguration:
           IndexDocument: index.html
@@ -45,7 +44,7 @@ resources:
             - Sid: "AllowCloudFrontAccess"
               Effect: Allow
               Action: s3:GetObject
-              Resource: arn:aws:s3:::${self:custom.s3BucketName}/*
+              Resource: arn:aws:s3:::${self:custom.client.bucketName}/*
               Principal:
                 Service: cloudfront.amazonaws.com
               Condition:
@@ -68,7 +67,7 @@ resources:
       Properties:
         DistributionConfig:
           Origins:
-            - DomainName: ${self:custom.s3BucketName}.s3.amazonaws.com
+            - DomainName: ${self:custom.client.bucketName}.s3.amazonaws.com
               ## An identifier for the origin which must be unique within the distribution
               Id: myS3Origin
               ## In case you don't want to restrict the bucket access use CustomOriginConfig and remove S3OriginConfig

@@ -9,7 +9,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertNoExternalIamPolicies } from './scripts/package-invariants.mjs';
+import {
+  assertDynamoDbTablesRetained,
+  assertNoExternalIamPolicies,
+} from './scripts/package-invariants.mjs';
 
 const fail = (message) => {
   throw new Error(message);
@@ -76,6 +79,7 @@ const template = JSON.parse(
   ),
 );
 assertNoExternalIamPolicies(template);
+assertDynamoDbTablesRetained(template);
 const lambdaResources = Object.entries(template.Resources).filter(
   ([, resource]) => resource.Type === 'AWS::Lambda::Function',
 );
