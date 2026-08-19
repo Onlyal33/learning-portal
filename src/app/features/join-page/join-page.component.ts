@@ -1,17 +1,15 @@
-import { Component } from '@angular/core';
-import { ButtonComponent } from "../../shared/components/button/button.component";
-import { JoinBoxComponent } from "../../shared/components/join-box/join-box.component";
+import { Component, inject } from '@angular/core';
+import { JoinBoxComponent } from '../../shared/components/join-box/join-box.component';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-join-page',
-  standalone: true,
-  imports: [ButtonComponent, JoinBoxComponent],
+  imports: [JoinBoxComponent],
   templateUrl: './join-page.component.html',
-  styleUrl: './join-page.component.scss'
+  styleUrl: './join-page.component.scss',
 })
 export class JoinPageComponent {
-  constructor(private router: Router) {}
+  private router = inject(Router);
 
   onJoinAsStudentClick(): void {
     this.router.navigate(['/registration', 'student']);

@@ -20,34 +20,35 @@
       (ngSubmit)="onSubmit()"
       class="registration-form"
     >
-      <div *ngFor="let field of formFields" class="form__control">
-        <label
-          [for]="field.name"
-          [class.invalid]="
-            registrationForm.get(field.name)?.invalid &&
-            registrationForm.get(field.name)?.touched
-          "
-          >{{ field.label }}</label
-        >
-        <input
-          [id]="field.name"
-          [formControlName]="field.name"
-          [type]="field.type || 'text'"
-        />
-        <div
-          *ngIf="
-            registrationForm.get(field.name)?.invalid &&
-            registrationForm.get(field.name)?.touched
-          "
-        >
-          <div
-            *ngIf="registrationForm.get(field.name)?.errors?.['required']"
-            class="validation-error"
+      @for (field of formFields; track field) {
+        <div class="form__control">
+          <label
+            [for]="field.name"
+            [class.invalid]="
+              registrationForm.get(field.name)?.invalid &&
+              registrationForm.get(field.name)?.touched
+            "
+            >{{ field.label }}</label
           >
-            {{ field.label }} is required.
-          </div>
+          <input
+            [id]="field.name"
+            [formControlName]="field.name"
+            [type]="field.type || 'text'"
+          />
+          @if (
+            registrationForm.get(field.name)?.invalid &&
+            registrationForm.get(field.name)?.touched
+          ) {
+            <div>
+              @if (registrationForm.get(field.name)?.errors?.["required"]) {
+                <div class="validation-error">
+                  {{ field.label }} is required.
+                </div>
+              }
+            </div>
+          }
         </div>
-      </div>
+      }
       <app-button type="submit" width="full" class="button">Submit</app-button>
     </form>
   </div>

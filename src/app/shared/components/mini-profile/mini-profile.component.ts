@@ -1,18 +1,21 @@
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
-import { NgIf } from '@angular/common';
+
 import { Router } from '@angular/router';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Profile } from '../../models/user.model';
 
 @Component({
   selector: 'app-mini-profile',
-  standalone: true,
-  imports: [ButtonComponent, NgIf, MatSlideToggleModule],
+  imports: [ButtonComponent, MatSlideToggleModule],
   templateUrl: './mini-profile.component.html',
   styleUrl: './mini-profile.component.scss',
 })
 export class MiniProfileComponent {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
   profile: Profile = {
     id: '1',
     firstName: 'Marta',
@@ -27,13 +30,11 @@ export class MiniProfileComponent {
     address: '123 Main St, Anytown, USA',
   };
 
-  constructor(private router: Router) {}
-
   navigateToAccount(): void {
     this.router.navigate(['/account']);
   }
 
   logout(): void {
-    this.router.navigate(['/']);
+    this.authService.logout();
   }
 }

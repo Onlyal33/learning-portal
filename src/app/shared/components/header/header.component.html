@@ -50,20 +50,26 @@
     variant="primary-light"
     >{{ isAuthorized ? "Sign out" : "Sign in" }}</app-button
   >
-  <app-button *ngIf="!isAuthorized" (click)="onJoinButtonClick()" size="sm"
-    >Join us</app-button
-  >
+  @if (!isAuthorized) {
+    <app-button (click)="onJoinButtonClick()" size="sm">Join us</app-button>
+  }
 </div>
-<div class="collapsible-menu" *ngIf="isMenuOpen">
-  <ul class="sidebar-menu">
-    <li *ngIf="!isAuthorized" class="sidebar-menu-item">
-      <a routerLink="/">Sign in</a>
-    </li>
-    <li *ngIf="!isAuthorized" class="sidebar-menu-item">
-      <a routerLink="/">Join us</a>
-    </li>
-    <li class="sidebar-menu-item"><a routerLink="/blog">Blog</a></li>
-    <li class="sidebar-menu-item"><a routerLink="/pricing">Pricing</a></li>
-    <li class="sidebar-menu-item"><a routerLink="/about">About us</a></li>
-  </ul>
-</div>
+@if (isMenuOpen) {
+  <div class="collapsible-menu">
+    <ul class="sidebar-menu">
+      @if (!isAuthorized) {
+        <li class="sidebar-menu-item">
+          <a routerLink="/">Sign in</a>
+        </li>
+      }
+      @if (!isAuthorized) {
+        <li class="sidebar-menu-item">
+          <a routerLink="/">Join us</a>
+        </li>
+      }
+      <li class="sidebar-menu-item"><a routerLink="/blog">Blog</a></li>
+      <li class="sidebar-menu-item"><a routerLink="/pricing">Pricing</a></li>
+      <li class="sidebar-menu-item"><a routerLink="/about">About us</a></li>
+    </ul>
+  </div>
+}

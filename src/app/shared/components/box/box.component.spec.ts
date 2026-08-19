@@ -8,16 +8,21 @@ describe('BoxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BoxComponent]
-    })
-    .compileComponents();
+      imports: [BoxComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BoxComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('title', 'Featured course');
+    fixture.componentRef.setInput('tag', 'Learning');
+    fixture.componentRef.setInput('src', 'box-1.jpg');
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('h6')?.textContent).toContain(
+      'Featured course',
+    );
   });
 });

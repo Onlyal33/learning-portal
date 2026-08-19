@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { UserStoreService } from '../../user/services/user-store.service';
+import { createUserStoreServiceDouble } from '../../../testing/component-test-doubles';
 
 import { MyAccountPageComponent } from './my-account-page.component';
 
@@ -8,9 +10,14 @@ describe('MyAccountPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MyAccountPageComponent]
-    })
-    .compileComponents();
+      imports: [MyAccountPageComponent],
+      providers: [
+        {
+          provide: UserStoreService,
+          useValue: createUserStoreServiceDouble(),
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MyAccountPageComponent);
     component = fixture.componentInstance;

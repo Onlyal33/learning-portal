@@ -6,7 +6,7 @@ export const authorizedGuard: CanMatchFn = () => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
-  if (authService.isAuthorized) {
+  if (authService.hasValidSession()) {
     return true;
   }
 

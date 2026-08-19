@@ -1,5 +1,4 @@
-import { NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -16,12 +15,10 @@ import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
-  standalone: true,
   imports: [
     FormsModule,
     ReactiveFormsModule,
     ButtonComponent,
-    NgIf,
     RouterLink,
     PasswordToggleDirective,
   ],
@@ -29,14 +26,12 @@ import { AuthService } from '../../auth/services/auth.service';
   styleUrl: './login-page.component.scss',
 })
 export class LoginPageComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
   readonly formFields = LoginFormFields;
   loginForm!: FormGroup;
-
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private authService: AuthService,
-  ) {}
 
   ngOnInit(): void {
     this.buildForm();

@@ -1,4 +1,11 @@
-import { Directive, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  Input,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 @Directive({
@@ -6,15 +13,13 @@ import { FormControl, NgControl } from '@angular/forms';
   standalone: true,
 })
 export class PasswordToggleDirective implements OnInit {
+  private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
+  private renderer = inject(Renderer2);
+  private ngControl = inject(NgControl);
+
   private iconShow!: HTMLImageElement;
   private iconHide!: HTMLImageElement;
   @Input('appPasswordToggle') control!: FormControl | null;
-
-  constructor(
-    private el: ElementRef<HTMLInputElement>,
-    private renderer: Renderer2,
-    private ngControl: NgControl,
-  ) {}
 
   ngOnInit(): void {
     this.cretateIcons();

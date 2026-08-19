@@ -1,5 +1,5 @@
-import { NgFor, NgIf, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -8,7 +8,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
   studentRegistrationFormFieldsArray,
@@ -18,33 +18,27 @@ import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-registration-page',
-  standalone: true,
   imports: [
     FormsModule,
     ReactiveFormsModule,
     ButtonComponent,
-    NgIf,
-    NgFor,
-    RouterLink,
     NgOptimizedImage,
   ],
   templateUrl: './registration-page.component.html',
   styleUrl: './registration-page.component.scss',
 })
 export class RegistrationPageComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+
   registrationForm!: FormGroup;
   formType!: 'student' | 'trainer';
   formFields!:
     | typeof studentRegistrationFormFieldsArray
     | typeof trainerRegistrationFormFieldsArray;
   src!: string;
-
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private route: ActivatedRoute,
-    private authService: AuthService,
-  ) {}
 
   ngOnInit(): void {
     this.buildForm();

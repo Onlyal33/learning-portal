@@ -6,7 +6,7 @@ export const notAuthorizedGuard: CanActivateFn = () => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
-  if (!authService.isAuthorized) {
+  if (!authService.hasValidSession()) {
     return true;
   }
 
