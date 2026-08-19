@@ -55,7 +55,7 @@ export class AuthService {
         const { token } = res;
         if (token) {
           this.sessionStorageService.setToken(token);
-          this.isAuthorised = true;
+          this.isAuthorized = true;
           if (!isFirstAuth) {
             this.router.navigate(['/home']);
           } else {
@@ -79,7 +79,7 @@ export class AuthService {
         next: (res) => {
           if (res.ok) {
             this.sessionStorageService.deleteToken();
-            this.isAuthorised = false;
+            this.isAuthorized = false;
             this.router.navigate([this.getLoginUrl()]);
           }
         },
@@ -90,16 +90,20 @@ export class AuthService {
       });
   }
 
-  get isAuthorised(): boolean {
-    console.log('AuthService: isAuthorised', this.isAuthorized$$.value);
+  get isAuthorized(): boolean {
+    console.log('AuthService: isAuthorized', this.isAuthorized$$.value);
     return this.isAuthorized$$.value;
   }
 
-  set isAuthorised(value: boolean) {
+  set isAuthorized(value: boolean) {
     this.isAuthorized$$.next(value);
   }
 
   getLoginUrl(): string {
     return `/login`;
+  }
+
+  navigateToLogin(): void {
+    this.router.navigate([this.getLoginUrl()]);
   }
 }

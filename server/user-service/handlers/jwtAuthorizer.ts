@@ -20,14 +20,9 @@ const isTokenBlacklisted = async (token: string): Promise<boolean> => {
     },
   };
 
-  try {
-    const command = new GetItemCommand(params);
-    const result = await dynamoDbClient.send(command);
-    return !!result.Item;
-  } catch (error) {
-    console.error('Error checking token blacklist:', error);
-    throw new Error('Error checking token blacklist');
-  }
+  const command = new GetItemCommand(params);
+  const result = await dynamoDbClient.send(command);
+  return !!result.Item;
 };
 
 const jwtAuthorizer = async (
@@ -37,10 +32,11 @@ const jwtAuthorizer = async (
 ) => {
   if (!JWT_SECRET) {
     cb('Server error: jwt is not defined');
+    return;
   }
 
   if (!event.type || event.type !== 'REQUEST') {
-    cb('Unauthorized');
+    cb('Unauthorized: Invalid event type');
     return;
   }
 
@@ -57,14 +53,19 @@ const jwtAuthorizer = async (
 
     const blacklisted = await isTokenBlacklisted(token);
     if (blacklisted) {
-      cb('Unauthorized: Token is blacklisted');
+      cb('Unauthorized: Authorization token is blacklisted');
       return;
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    if (typeof decoded === 'string') {
+      cb('Unauthorized: Invalid authorization token');
+      return;
+    }
+
     const policy: APIGatewayAuthorizerResult = {
-      principalId: decoded.sub.toString(),
+      principalId: decoded.id,
       policyDocument: {
         Version: '2012-10-17',
         Statement: [
@@ -76,7 +77,7 @@ const jwtAuthorizer = async (
         ],
       },
       context: {
-        userId: decoded.sub.toString(),
+        userId: decoded.id,
         token,
       },
     };

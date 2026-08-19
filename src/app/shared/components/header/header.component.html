@@ -48,18 +48,18 @@
     (click)="onSignInButtonClick()"
     size="sm"
     variant="primary-light"
-    >{{ isAuthorised ? "Sign out" : "Sign in" }}</app-button
+    >{{ isAuthorized ? "Sign out" : "Sign in" }}</app-button
   >
-  <app-button *ngIf="!isAuthorised" (click)="onJoinButtonClick()" size="sm"
+  <app-button *ngIf="!isAuthorized" (click)="onJoinButtonClick()" size="sm"
     >Join us</app-button
   >
 </div>
 <div class="collapsible-menu" *ngIf="isMenuOpen">
   <ul class="sidebar-menu">
-    <li *ngIf="!isAuthorised" class="sidebar-menu-item">
+    <li *ngIf="!isAuthorized" class="sidebar-menu-item">
       <a routerLink="/">Sign in</a>
     </li>
-    <li *ngIf="!isAuthorised" class="sidebar-menu-item">
+    <li *ngIf="!isAuthorized" class="sidebar-menu-item">
       <a routerLink="/">Join us</a>
     </li>
     <li class="sidebar-menu-item"><a routerLink="/blog">Blog</a></li>

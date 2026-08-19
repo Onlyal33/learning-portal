@@ -27,6 +27,7 @@ export class UserStoreService {
     this.userService.getUser().subscribe({
       next: (user: GetUserResponse) => {
         this.user$$.next(user);
+        console.log('User fetched successfully:', user);
       },
       error: (error) => {
         console.error('Error fetching user data:', error);

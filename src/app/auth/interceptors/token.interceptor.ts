@@ -9,20 +9,33 @@ import { inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { SessionStorageService } from '../services/session-storage.service';
+import { jwtDecode } from 'jwt-decode';
 
 export const tokenInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> => {
   const authService = inject(AuthService);
+  const sessionStorageService = inject(SessionStorageService);
 
-  if (authService.isAuthorised) {
-    const token = inject(SessionStorageService).getToken();
-    console.log('token', token);
+  if (authService.isAuthorized) {
+    const token = sessionStorageService.getToken();
     if (token) {
-      req = req.clone({
-        headers: req.headers.set('Authorization', token),
-      });
+      const decodedToken: { exp: number } = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (decodedToken.exp < currentTime) {
+        sessionStorageService.deleteToken();
+        authService.isAuthorized = false;
+        authService.navigateToLogin();
+      } else {
+        const clonedReq = req.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return next(clonedReq);
+      }
     }
   }
 

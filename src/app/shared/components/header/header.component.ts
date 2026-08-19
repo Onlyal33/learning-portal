@@ -31,14 +31,14 @@ export class HeaderComponent {
   }
 
   onSignInButtonClick(): void {
-    if (this.authService.isAuthorised) {
+    if (this.authService.isAuthorized) {
       this.authService.logout();
     } else {
       this.router.navigate(['/login']);
     }
   }
 
-  get isAuthorised(): boolean {
-    return this.authService.isAuthorised;
+  get isAuthorized(): boolean {
+    return this.authService.isAuthorized;
   }
 }
