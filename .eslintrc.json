@@ -9,8 +9,7 @@
     {
       "files": ["*.ts"],
       "parserOptions": {
-        "project": ["tsconfig.json", "e2e/tsconfig.json"],
-        "createDefaultProgram": true
+        "project": ["tsconfig.json", "e2e/tsconfig.json"]
       },
       "extends": [
         "eslint:recommended",

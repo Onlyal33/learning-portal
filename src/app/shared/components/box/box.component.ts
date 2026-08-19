@@ -3,7 +3,6 @@ import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-box',
-  standalone: true,
   imports: [NgOptimizedImage],
   templateUrl: './box.component.html',
   styleUrl: './box.component.scss',

@@ -1,21 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
-import { NgIf } from '@angular/common';
+
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
-  imports: [ButtonComponent, NgIf, RouterLink, RouterLinkActive],
+  imports: [ButtonComponent, RouterLink, RouterLinkActive],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-  ) {}
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
   isMenuOpen = false;
 
   toggleMenu() {
@@ -31,14 +29,14 @@ export class HeaderComponent {
   }
 
   onSignInButtonClick(): void {
-    if (this.authService.isAuthorised) {
+    if (this.authService.isAuthorized) {
       this.authService.logout();
     } else {
       this.router.navigate(['/login']);
     }
   }
 
-  get isAuthorised(): boolean {
-    return this.authService.isAuthorised;
+  get isAuthorized(): boolean {
+    return this.authService.isAuthorized;
   }
 }

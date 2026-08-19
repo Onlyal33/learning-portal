@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Router } from '@angular/router';
 import { map, Observable } from 'rxjs';
@@ -7,19 +7,16 @@ import { SecureDataService } from '../../shared/services/secure-data.service';
 
 @Component({
   selector: 'app-registration-success-page',
-  standalone: true,
   imports: [ButtonComponent],
   templateUrl: './registration-success-page.component.html',
   styleUrl: './registration-success-page.component.scss',
 })
 export class RegistrationSuccessPageComponent implements OnInit, OnDestroy {
-  password!: string;
+  private router = inject(Router);
+  private userStoreService = inject(UserStoreService);
+  private secureDataService = inject(SecureDataService);
 
-  constructor(
-    private router: Router,
-    private userStoreService: UserStoreService,
-    private secureDataService: SecureDataService,
-  ) {}
+  password!: string;
 
   ngOnInit(): void {
     this.password =

@@ -4,12 +4,9 @@ import {
   APIGatewayRequestAuthorizerEventV2,
   StatementEffect,
 } from 'aws-lambda';
-import * as dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from './jwtSecret.js';
 
-dotenv.config();
-
-const JWT_SECRET = process.env.JWT_SECRET;
 const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
 const isTokenBlacklisted = async (token: string): Promise<boolean> => {
@@ -20,14 +17,9 @@ const isTokenBlacklisted = async (token: string): Promise<boolean> => {
     },
   };
 
-  try {
-    const command = new GetItemCommand(params);
-    const result = await dynamoDbClient.send(command);
-    return !!result.Item;
-  } catch (error) {
-    console.error('Error checking token blacklist:', error);
-    throw new Error('Error checking token blacklist');
-  }
+  const command = new GetItemCommand(params);
+  const result = await dynamoDbClient.send(command);
+  return !!result.Item;
 };
 
 const jwtAuthorizer = async (
@@ -35,36 +27,47 @@ const jwtAuthorizer = async (
   _ctx: object,
   cb: (err: string | null, policy?: APIGatewayAuthorizerResult) => void,
 ) => {
-  if (!JWT_SECRET) {
-    cb('Server error: jwt is not defined');
-  }
-
   if (!event.type || event.type !== 'REQUEST') {
-    cb('Unauthorized');
+    cb('Unauthorized: Invalid event type');
     return;
   }
 
   try {
-    const authorizationToken =
-      event.headers['authorization'] || event.headers['Authorization'];
+    const authorizationHeader =
+      event.headers?.authorization ?? event.headers?.Authorization;
+    const match = authorizationHeader?.match(/^Bearer ([^\s]+)$/i);
 
-    if (!authorizationToken) {
-      cb('Unauthorized: No authorization token');
+    if (!match || match[0] !== authorizationHeader) {
+      cb('Unauthorized');
       return;
     }
 
-    const token = authorizationToken.split(' ')[1];
+    const token = match[1];
+
+    const jwtSecret = await getJwtSecret();
+    const decoded = jwt.verify(token, jwtSecret);
+
+    if (
+      typeof decoded === 'string' ||
+      !decoded ||
+      typeof decoded.id !== 'string' ||
+      !decoded.id.trim() ||
+      typeof decoded.exp !== 'number' ||
+      !Number.isFinite(decoded.exp) ||
+      decoded.exp <= Math.floor(Date.now() / 1000)
+    ) {
+      cb('Unauthorized');
+      return;
+    }
 
     const blacklisted = await isTokenBlacklisted(token);
     if (blacklisted) {
-      cb('Unauthorized: Token is blacklisted');
+      cb('Unauthorized');
       return;
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-
     const policy: APIGatewayAuthorizerResult = {
-      principalId: decoded.sub.toString(),
+      principalId: String(decoded.id),
       policyDocument: {
         Version: '2012-10-17',
         Statement: [
@@ -76,14 +79,15 @@ const jwtAuthorizer = async (
         ],
       },
       context: {
-        userId: decoded.sub.toString(),
+        userId: decoded.id,
         token,
+        expiresAt: decoded.exp,
       },
     };
 
     cb(null, policy);
   } catch (error) {
-    cb(`Unauthorized: ${error.message}`);
+    cb('Unauthorized');
   }
 };
 

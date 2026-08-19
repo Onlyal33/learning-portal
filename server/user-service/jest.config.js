@@ -13,5 +13,6 @@ export default {
   moduleNameMapper: {
     "(.+)\\.js": "$1",
   },
+  testPathIgnorePatterns: ["/node_modules/", "/\\.build/", "\\.integration\\.spec\\.ts$"],
   extensionsToTreatAsEsm: [".ts"],
 };

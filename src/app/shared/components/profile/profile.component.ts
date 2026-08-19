@@ -1,7 +1,7 @@
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
-import { NgFor, NgIf } from '@angular/common';
+
 import {
   FormBuilder,
   FormGroup,
@@ -27,7 +27,7 @@ const labelToLabelText: { [key: string]: string } = {
   email: 'Email',
   dateOfBirth: 'Date of Birth',
   address: 'Address',
-  specialization: 'Specialization',
+  specializationId: 'Specialization',
 };
 
 const getlabelText = function getlabelText(label: string): string {
@@ -36,11 +36,8 @@ const getlabelText = function getlabelText(label: string): string {
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
   imports: [
     ButtonComponent,
-    NgFor,
-    NgIf,
     FormsModule,
     ReactiveFormsModule,
     MatSlideToggleModule,
@@ -49,6 +46,9 @@ const getlabelText = function getlabelText(label: string): string {
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private userStoreService = inject(UserStoreService);
+
   profile!: GetUserResponse;
   /*   profile: Profile = {
     id: '1',
@@ -66,11 +66,6 @@ export class ProfileComponent implements OnInit {
   profileInfo!: ProfileInfo[];
   profileForm!: FormGroup;
   editMode = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private userStoreService: UserStoreService,
-  ) {}
 
   ngOnInit(): void {
     this.initializeForm();
@@ -104,7 +99,7 @@ export class ProfileComponent implements OnInit {
           key === 'lastName' ||
           key === 'username' ||
           key === 'email' ||
-          key === 'specialization',
+          key === 'specializationId',
         type: key === 'dateOfBirth' ? 'date' : 'text',
       }));
 

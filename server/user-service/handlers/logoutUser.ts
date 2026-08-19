@@ -1,25 +1,24 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import * as dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
+import {
+  getAuthorizerContext,
+  unauthorizedResponse,
+  UserAuthorizerContext,
+} from './authorizerContext.js';
+import { isDynamoOverloaded, overloadResponse } from './dynamoErrors.js';
 
-dotenv.config();
 const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-const logoutUser: APIGatewayProxyHandler = async (event) => {
-  const token = event.requestContext.authorizer.token;
+const logoutUser: APIGatewayProxyHandlerV2WithLambdaAuthorizer<
+  UserAuthorizerContext
+> = async (event) => {
+  const authorizerContext = getAuthorizerContext(event, true);
+  if (!authorizerContext) {
+    return unauthorizedResponse();
+  }
+  const { token, expiresAt } = authorizerContext;
 
   try {
-    const decodedToken = jwt.verify(
-      token,
-      process.env.JWT_SECRET,
-    ) as jwt.JwtPayload;
-    const expiresAt = decodedToken.exp;
-
-    if (!expiresAt) {
-      throw new Error('Token does not have an expiration time');
-    }
-
     const putItemCommand = new PutItemCommand({
       TableName: process.env.BLACKLISTED_TOKENS_TABLE,
       Item: {
@@ -35,12 +34,12 @@ const logoutUser: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ message: 'User logged out successfully' }),
     };
   } catch (error) {
+    if (isDynamoOverloaded(error)) return overloadResponse();
     return {
       statusCode: 500,
       body: JSON.stringify({
         errorCode: 500,
         message: 'Internal Server Error',
-        error: error.message,
       }),
     };
   }
