@@ -7,6 +7,15 @@ export interface User {
   photo: string;
   password: string;
   isActive: boolean;
+  canonicalEmail: string;
+  role: 'student' | 'trainer';
+  roleProfileId: string;
+}
+
+export interface EmailClaim {
+  id: string;
+  entityType: 'email-claim';
+  userId: string;
 }
 
 export interface Student {
@@ -28,9 +37,21 @@ type TrainerWithoutIds = Omit<Trainer, 'id' | 'userId'>;
 
 type StudentWithoutIds = Omit<Student, 'id' | 'userId'>;
 
-type UserWithoutIdPassword = Omit<User, 'id' | 'password'>;
+type ServerOwnedUserFields =
+  | 'id'
+  | 'password'
+  | 'canonicalEmail'
+  | 'role'
+  | 'roleProfileId';
 
-type UserWithoutIdPasswordPhoto = Omit<UserWithoutIdPassword, 'photo'>;
+type UserInput = Omit<User, ServerOwnedUserFields>;
+
+type UserInputWithoutPhoto = Omit<UserInput, 'photo'>;
+
+type PublicUser = Omit<
+  User,
+  'id' | 'password' | 'canonicalEmail' | 'role' | 'roleProfileId'
+>;
 
 export interface ErrorResponse {
   errorCode: number;
@@ -44,13 +65,13 @@ export interface LoginRequest {
 }
 
 export type RegistrationRequest = Omit<
-  UserWithoutIdPasswordPhoto,
+  UserInputWithoutPhoto,
   'isActive'
 > & { role: 'trainer' | 'student' } & (StudentWithoutIds | TrainerWithoutIds);
 
 export type UpdateUserRequest =
-  | (StudentWithoutIds & UserWithoutIdPasswordPhoto)
-  | (TrainerWithoutIds & UserWithoutIdPasswordPhoto);
+  | (StudentWithoutIds & UserInputWithoutPhoto)
+  | (TrainerWithoutIds & UserInputWithoutPhoto);
 
 export interface LoginResponse {
   token: string;
@@ -62,8 +83,8 @@ export interface RegistrationResponse {
 }
 
 export type GetUserResponse =
-  | (StudentWithoutIds & UserWithoutIdPassword)
-  | (TrainerWithoutIds & UserWithoutIdPassword);
+  | (StudentWithoutIds & PublicUser)
+  | (TrainerWithoutIds & PublicUser);
 
 export type DeleteUserResponse = { message: string };
 

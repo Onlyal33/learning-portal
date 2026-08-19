@@ -1,27 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import { Profile, Student, Trainer } from '../models/user.model';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { APIGatewayProxyHandlerV2WithLambdaAuthorizer } from 'aws-lambda';
+import { getIdentityUser, getRoleProfile } from './profileLookup.js';
+import {
+  getAuthorizerContext,
+  unauthorizedResponse,
+  UserAuthorizerContext,
+} from './authorizerContext.js';
+import { isDynamoOverloaded, overloadResponse } from './dynamoErrors.js';
 
-const dynamoDbClient = new DynamoDBClient({ region: process.env.REGION });
+export const createGetCurrentUserHandler = (dynamoDbClient: DynamoDBClient): APIGatewayProxyHandlerV2WithLambdaAuthorizer<
+  UserAuthorizerContext
+> => async (event) => {
+  const authorizerContext = getAuthorizerContext(event);
+  if (!authorizerContext) {
+    return unauthorizedResponse();
+  }
 
-const getCurrentUser: APIGatewayProxyHandler = async (event) => {
   try {
-    const id = JSON.parse(event.requestContext.authorizer.userId);
-
-    const getUserParams = {
-      TableName: process.env.USER_TABLE,
-      Key: {
-        id: { S: id },
-      },
-    };
-
-    const getUserResult = await dynamoDbClient.send(
-      new GetItemCommand(getUserParams),
-    );
-
-    if (!getUserResult.Item) {
+    const { userId: id } = authorizerContext;
+    const user = await getIdentityUser(dynamoDbClient, id);
+    if (!user) {
       return {
         statusCode: 404,
         body: JSON.stringify({
@@ -31,40 +30,8 @@ const getCurrentUser: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    const { password, ...user } = unmarshall(getUserResult.Item);
-
-    let roleData = {} as Profile;
-    let role = '';
-
-    const getStudentParams = {
-      TableName: process.env.STUDENT_TABLE,
-      Key: {
-        userId: { S: id },
-      },
-    };
-    const getStudentResult = await dynamoDbClient.send(
-      new GetItemCommand(getStudentParams),
-    );
-    if (getStudentResult.Item) {
-      roleData = unmarshall(getStudentResult.Item) as Student;
-      role = 'student';
-    } else {
-      const getTrainerParams = {
-        TableName: process.env.TRAINER_TABLE,
-        Key: {
-          userId: { S: id },
-        },
-      };
-      const getTrainerResult = await dynamoDbClient.send(
-        new GetItemCommand(getTrainerParams),
-      );
-      if (getTrainerResult.Item) {
-        roleData = unmarshall(getTrainerResult.Item) as Trainer;
-        role = 'trainer';
-      }
-    }
-
-    if (!role) {
+    const profile = await getRoleProfile(dynamoDbClient, user);
+    if (!profile) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -74,24 +41,36 @@ const getCurrentUser: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    const { id: roleTableId, userId, ...roleDataWtioutId } = roleData;
-
-    const combinedUserData = { ...user, ...roleDataWtioutId };
+    const publicUser = Object.fromEntries(
+      ['id', 'firstName', 'lastName', 'username', 'email', 'photo', 'isActive']
+        .filter((key) => user[key] !== undefined)
+        .map((key) => [key, user[key]]),
+    );
+    const publicRoleFields = profile.role === 'student'
+      ? ['dateOfBirth', 'address']
+      : ['specializationId'];
+    const publicRole = Object.fromEntries(
+      publicRoleFields
+        .filter((key) => profile.data[key] !== undefined)
+        .map((key) => [key, profile.data[key]]),
+    );
 
     return {
       statusCode: 200,
-      body: JSON.stringify(combinedUserData),
+      body: JSON.stringify({ ...publicUser, ...publicRole }),
     };
   } catch (error) {
+    if (isDynamoOverloaded(error)) return overloadResponse();
     return {
       statusCode: 500,
       body: JSON.stringify({
         errorCode: 500,
         message: 'Internal Server Error',
-        error: error.message,
       }),
     };
   }
 };
 
-export default getCurrentUser;
+export default createGetCurrentUserHandler(
+  new DynamoDBClient({ region: process.env.REGION }),
+);
