@@ -295,6 +295,24 @@ if (
   fail('HTTP API authorizer caching is not disabled');
 }
 
+const expectedCors = {
+  AllowHeaders: [
+    'content-type',
+    'x-amz-date',
+    'authorization',
+    'x-api-key',
+    'x-amz-security-token',
+    'x-amz-user-agent',
+    'x-amzn-trace-id',
+  ],
+  AllowMethods: ['OPTIONS', 'POST', 'GET', 'DELETE', 'PUT'],
+  AllowOrigins: ['*'],
+};
+const actualCors = template.Resources.HttpApi?.Properties?.CorsConfiguration;
+if (JSON.stringify(actualCors) !== JSON.stringify(expectedCors)) {
+  fail(`HTTP API CORS is not canonical: ${JSON.stringify(actualCors)}`);
+}
+
 const extractionDirectory = mkdtempSync(
   join(tmpdir(), 'user-service-package-'),
 );

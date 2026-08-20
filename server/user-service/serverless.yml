@@ -31,7 +31,15 @@ provider:
             - arn:aws:dynamodb:${self:provider.region}:*:table/SpecializationTable
             - arn:aws:dynamodb:${self:provider.region}:*:table/BlacklistedTokensTable
   httpApi:
-    cors: true
+    cors:
+      allowedHeaders:
+        - content-type
+        - x-amz-date
+        - authorization
+        - x-api-key
+        - x-amz-security-token
+        - x-amz-user-agent
+        - x-amzn-trace-id
     authorizers:
       customLambdaAuthorizer:
         type: request

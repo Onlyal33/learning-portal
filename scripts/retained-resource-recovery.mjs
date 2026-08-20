@@ -331,8 +331,6 @@ function commandPlan(stack) {
       changeSetName,
       "--change-set-type",
       "IMPORT",
-      "--tags",
-      `Key=STAGE,Value=${stack.stage}`,
       "--template-body",
       JSON.stringify(stack.template),
       "--resources-to-import",
@@ -454,14 +452,22 @@ export async function writeRecoveryBundle(
 ) {
   validateExpectedAccountId(expectedAccountId);
   const absoluteOutputDirectory = resolve(outputDirectory);
-  if (existsSync(absoluteOutputDirectory)) {
-    fail(`output path already exists: ${absoluteOutputDirectory}`);
-  }
 
   const stacks = specs.map((spec) =>
     buildStackRecovery(spec, renderServerlessConfig(spec)),
   );
-  await mkdir(absoluteOutputDirectory, { recursive: true, mode: 0o700 });
+  await mkdir(dirname(absoluteOutputDirectory), {
+    recursive: true,
+    mode: 0o700,
+  });
+  try {
+    await mkdir(absoluteOutputDirectory, { mode: 0o700 });
+  } catch (error) {
+    if (error?.code === "EEXIST") {
+      fail(`output path already exists: ${absoluteOutputDirectory}`);
+    }
+    throw error;
+  }
 
   const manifest = {
     schemaVersion: 2,
@@ -614,84 +620,89 @@ function reconstructApprovedAwsArguments(
     fail("recovery plan stack inventory differs from the approved inventory");
   }
 
-  const spec = recoverySpecs.find(({ key }) => key === stackKey);
-  const stack = manifest.stacks.find(({ key }) => key === stackKey);
-  if (!spec || !stack) {
+  const approvedStacks = new Map();
+  for (const spec of recoverySpecs) {
+    const stack = manifest.stacks.find(({ key }) => key === spec.key);
+    if (!stack) {
+      fail(`recovery plan has no stack key ${spec.key}`);
+    }
+
+    const expectedLogicalResourceIds = spec.resources.map(
+      ({ logicalId }) => logicalId,
+    );
+    const expectedTemplateFile = `${spec.stackName}.import-template.json`;
+    const expectedResourceMapFile = `${spec.stackName}.resources-to-import.json`;
+    const expectedStackPolicyFile = `${spec.stackName}.durable-resource-stack-policy.json`;
+    const expectedMetadata = {
+      key: spec.key,
+      service: spec.service,
+      stage: spec.stage,
+      region: spec.region,
+      stackName: spec.stackName,
+      templateFile: expectedTemplateFile,
+      resourceMapFile: expectedResourceMapFile,
+      stackPolicyFile: expectedStackPolicyFile,
+      logicalResourceIds: expectedLogicalResourceIds,
+    };
+    for (const [field, expected] of Object.entries(expectedMetadata)) {
+      if (!isDeepStrictEqual(stack[field], expected)) {
+        fail(`${spec.key}.${field} differs from the approved recovery plan`);
+      }
+    }
+
+    const expectedRecovery = buildStackRecovery(
+      spec,
+      renderServerlessConfig(spec),
+    );
+    const artifacts = [
+      [expectedTemplateFile, expectedRecovery.template],
+      [expectedResourceMapFile, expectedRecovery.resourcesToImport],
+      [expectedStackPolicyFile, expectedRecovery.stackPolicy],
+    ];
+    for (const [fileName, expectedContent] of artifacts) {
+      const artifactPath = join(absolutePlanDirectory, fileName);
+      let actualContent;
+      try {
+        actualContent = JSON.parse(readFileSync(artifactPath, "utf8"));
+      } catch (error) {
+        fail(
+          `could not validate recovery artifact ${fileName}: ${error.message}`,
+        );
+      }
+      if (!isDeepStrictEqual(actualContent, expectedContent)) {
+        fail(
+          `recovery artifact ${fileName} differs from the currently rendered approved content`,
+        );
+      }
+    }
+
+    const expectedAwsArguments = commandPlan(expectedRecovery);
+    if (!isDeepStrictEqual(stack.awsArguments, expectedAwsArguments)) {
+      fail(
+        `${spec.key} CloudFormation action arguments differ from the approved plan`,
+      );
+    }
+
+    const expectedCommands = gatedCommandPlan(
+      join(absolutePlanDirectory, "recovery-plan.json"),
+      manifest.expectedAccountId,
+      spec.key,
+      expectedAwsArguments,
+    );
+    if (!isDeepStrictEqual(stack.commands, expectedCommands)) {
+      fail(
+        `${spec.key} account-gated command inventory differs from the approved plan`,
+      );
+    }
+
+    approvedStacks.set(spec.key, { spec, expectedAwsArguments });
+  }
+
+  const approvedStack = approvedStacks.get(stackKey);
+  if (!approvedStack) {
     fail(`recovery plan has no stack key ${String(stackKey)}`);
   }
-
-  const expectedLogicalResourceIds = spec.resources.map(
-    ({ logicalId }) => logicalId,
-  );
-  const expectedTemplateFile = `${spec.stackName}.import-template.json`;
-  const expectedResourceMapFile = `${spec.stackName}.resources-to-import.json`;
-  const expectedStackPolicyFile = `${spec.stackName}.durable-resource-stack-policy.json`;
-  const expectedMetadata = {
-    key: spec.key,
-    service: spec.service,
-    stage: spec.stage,
-    region: spec.region,
-    stackName: spec.stackName,
-    templateFile: expectedTemplateFile,
-    resourceMapFile: expectedResourceMapFile,
-    stackPolicyFile: expectedStackPolicyFile,
-    logicalResourceIds: expectedLogicalResourceIds,
-  };
-  for (const [field, expected] of Object.entries(expectedMetadata)) {
-    if (!isDeepStrictEqual(stack[field], expected)) {
-      fail(`${stackKey}.${field} differs from the approved recovery plan`);
-    }
-  }
-
-  const expectedRecovery = buildStackRecovery(
-    spec,
-    renderServerlessConfig(spec),
-  );
-  const artifacts = [
-    [expectedTemplateFile, expectedRecovery.template],
-    [expectedResourceMapFile, expectedRecovery.resourcesToImport],
-    [expectedStackPolicyFile, expectedRecovery.stackPolicy],
-  ];
-  for (const [fileName, expectedContent] of artifacts) {
-    const artifactPath = join(absolutePlanDirectory, fileName);
-    let actualContent;
-    try {
-      actualContent = JSON.parse(readFileSync(artifactPath, "utf8"));
-    } catch (error) {
-      fail(
-        `could not validate recovery artifact ${fileName}: ${error.message}`,
-      );
-    }
-    if (!isDeepStrictEqual(actualContent, expectedContent)) {
-      fail(
-        `recovery artifact ${fileName} differs from the currently rendered approved content`,
-      );
-    }
-  }
-
-  const expectedAwsArguments = commandPlan(expectedRecovery);
-  if (
-    !isDeepStrictEqual(
-      Object.keys(stack.awsArguments ?? {}),
-      Object.keys(expectedAwsArguments),
-    )
-  ) {
-    fail(
-      `${stackKey} CloudFormation action inventory differs from the approved plan`,
-    );
-  }
-
-  const expectedCommands = gatedCommandPlan(
-    join(absolutePlanDirectory, "recovery-plan.json"),
-    manifest.expectedAccountId,
-    stackKey,
-    expectedAwsArguments,
-  );
-  if (!isDeepStrictEqual(stack.commands, expectedCommands)) {
-    fail(
-      `${stackKey} account-gated command inventory differs from the approved plan`,
-    );
-  }
+  const { spec, expectedAwsArguments } = approvedStack;
 
   if (action === "describeDrift") {
     if (typeof driftId !== "string" || !/^[A-Za-z0-9-]{1,36}$/.test(driftId)) {
@@ -708,13 +719,6 @@ function reconstructApprovedAwsArguments(
     ];
   }
 
-  if (
-    !isDeepStrictEqual(stack.awsArguments[action], expectedAwsArguments[action])
-  ) {
-    fail(
-      `${stackKey}.${action} arguments differ from the approved recovery action`,
-    );
-  }
   return expectedAwsArguments[action];
 }
 

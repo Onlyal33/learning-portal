@@ -173,10 +173,11 @@ npm run retained-resources:run -- \
 
 The explicit deny covers `Update:Replace` and `Update:Delete` for every imported
 logical ID, so the automatic Serverless updates fail rather than replace or
-remove a durable resource. The import applies the same `STAGE=dev` stack tag that
-Serverless supplies, avoiding a first-update tag mismatch. Property modifications
-remain possible, so the clean-drift and packaged-definition comparisons above are
-mandatory. Keep this policy after recovery. For a later intentional durable-
+remove a durable resource. CloudFormation import change sets must not add or
+modify stack tags, so the import-only stack is initially untagged; the first
+normal Serverless update applies its standard stack tags. Property modifications
+remain possible, so the clean-drift and packaged-definition comparisons above
+are mandatory. Keep this policy after recovery. For a later intentional durable-
 resource replacement or removal, replace it only under that migration's
 separately reviewed procedure and restore protection immediately afterward.
 
@@ -237,11 +238,26 @@ For a DynamoDB table:
    and validate keys, indexes, TTL, capacity, counts, and sampled records;
 3. update the Lambda environment and least-privilege IAM resource together,
    exercise the application against the target table, and retain a tested
-   rollback path;
+   rollback path. Before executing that rollback, freeze writes again and
+   reconcile every target-side write back to the source using table-specific
+   conflict semantics; verify that the source contains the complete rollback
+   state. For an append-only token blacklist, this is a union of all unexpired
+   revocations. Never roll back first and sync later, because that can make a
+   revocation disappear while its token is still valid;
 4. after cutover, prepare and review an archival stack template and import map;
    remove the old table from the application stack with its retain policy intact,
    confirm that all data remains, and immediately import it into the archival
    stack.
+
+A write freeze is an enforced, account-checked block on every writer, not an
+assumption based on low traffic. Establish the block, wait at least the maximum
+writer invocation time for in-flight work to drain, verify the block is still
+active, reconcile and verify the rollback state, execute and verify rollback,
+and prove the target received no later writes. Keep the freeze in place through
+the first application read that proves target-only state is effective on the
+restored source path. Restore each writer's exact prior concurrency or routing
+state afterward. If every writer cannot be enumerated and blocked, stop the
+rollback.
 
 A resource cannot be imported while another stack still manages it. The prepared
 archive import minimizes, but cannot eliminate, the ownership gap between the
@@ -257,29 +273,3 @@ management without deleting data.
 Archival and replacement plans must require their own independently selected
 expected account ID and route every CloudFormation action through the same
 per-command STS equality gate.
-
-## Required non-production recovery drill
-
-Offline tests verify template extraction, exact identifier coverage, static
-names, retain policies, and fail-closed generation. They cannot prove AWS account
-state or CloudFormation behavior. Before treating this runbook as operationally
-closed, perform and record this drill in a disposable AWS account or with
-uniquely named drill copies (the current fixed table names cannot coexist by
-stage in one account):
-
-1. seed the drill bucket and all five drill tables with sentinel data;
-2. delete the two drill stacks and confirm all six resources and sentinels remain;
-3. regenerate the import bundle, import under the original drill stack names,
-   confirm `IMPORT_COMPLETE`, and require clean drift results;
-4. run the normal Serverless updates and confirm all sentinels and application
-   reads still work;
-5. perform one S3 and one DynamoDB two-resource replacement migration, including
-   rollback, then import each predecessor into an archival stack;
-6. archive the identity/region, template digests, described change sets, stack
-   events, drift results, item/object verification, and cleanup outcome. Include
-   the independently selected expected account ID and the runner's verified STS
-   account output for every CloudFormation action.
-
-Deleting stacks, importing resources, copying data, and running replacement
-migrations are state-changing AWS operations. They are not run by the offline
-generator or its tests.

@@ -49,8 +49,8 @@ gate that calls STS immediately beforehand and rejects any caller-account
 mismatch. Before STS, it also re-renders and compares the complete import
 template, resource map, and stack policy; CloudFormation receives reconstructed
 inline JSON rather than mutable artifact paths. Execution remains a separate,
-state-changing AWS operation that requires region verification, backups,
-change-set review, and an approved non-production drill.
+state-changing AWS operation that requires region verification, backups, and
+change-set review.
 
 ## Running unit tests
 

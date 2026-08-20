@@ -93,8 +93,11 @@ test("recovery bundle emits import-only templates, identifiers, and guarded comm
     );
     assert.ok(stack.awsArguments.createChangeSet.includes("IMPORT"));
     assert.ok(!stack.awsArguments.createChangeSet.includes("CREATE"));
+    assert.ok(!stack.awsArguments.createChangeSet.includes("--tags"));
     assert.ok(
-      stack.awsArguments.createChangeSet.includes("Key=STAGE,Value=dev"),
+      !stack.awsArguments.createChangeSet.some((argument) =>
+        argument.startsWith("Key="),
+      ),
     );
     assert.ok(
       stack.awsArguments.waitForImport.includes("stack-import-complete"),
@@ -177,6 +180,30 @@ test("recovery plan generation rejects missing and malformed expected account ID
   await assert.rejects(
     () => writeRecoveryBundle(join(parent, "letters"), "12345678901x"),
     /exactly 12 decimal digits/,
+  );
+});
+
+test("concurrent recovery generation grants exactly one writer a new output directory", async (t) => {
+  const parent = await mkdtemp(
+    join(tmpdir(), "learning-portal-recovery-concurrency-test-"),
+  );
+  t.after(() => rm(parent, { recursive: true, force: true }));
+  const output = join(parent, "nested", "plan");
+
+  const attempts = await Promise.allSettled([
+    writeRecoveryBundle(output, expectedAccountId, []),
+    writeRecoveryBundle(output, expectedAccountId, []),
+  ]);
+  const fulfilled = attempts.filter(({ status }) => status === "fulfilled");
+  const rejected = attempts.filter(({ status }) => status === "rejected");
+
+  assert.equal(fulfilled.length, 1);
+  assert.equal(rejected.length, 1);
+  assert.match(rejected[0].reason.message, /output path already exists/);
+  assert.equal(
+    JSON.parse(await readFile(join(output, "recovery-plan.json"), "utf8"))
+      .expectedAccountId,
+    expectedAccountId,
   );
 });
 
@@ -376,6 +403,63 @@ test("modified recovery plans cannot change an allowlisted CloudFormation action
         plan.stacks[0].awsArguments.createChangeSet.push(
           "--role-arn",
           "arn:aws:iam::123456789012:role/UnreviewedRole",
+        );
+      },
+    },
+    {
+      name: "injected import tags",
+      mutate(plan) {
+        plan.stacks[0].awsArguments.createChangeSet.push(
+          "--tags",
+          "Key=STAGE,Value=dev",
+        );
+      },
+    },
+    {
+      name: "legacy web import tags while running a sibling action",
+      options: { ...baseOptions, action: "waitForChangeSet" },
+      mutate(plan) {
+        plan.stacks[0].awsArguments.createChangeSet.push(
+          "--tags",
+          "Key=STAGE,Value=dev",
+        );
+      },
+    },
+    {
+      name: "legacy backend import tags while running a sibling action",
+      options: {
+        ...baseOptions,
+        stackKey: "user-service",
+        action: "waitForChangeSet",
+      },
+      mutate(plan) {
+        plan.stacks[1].awsArguments.createChangeSet.push(
+          "--tags",
+          "Key=STAGE,Value=dev",
+        );
+      },
+    },
+    {
+      name: "legacy backend import tags while running a web action",
+      options: { ...baseOptions, action: "waitForChangeSet" },
+      mutate(plan) {
+        plan.stacks[1].awsArguments.createChangeSet.push(
+          "--tags",
+          "Key=STAGE,Value=dev",
+        );
+      },
+    },
+    {
+      name: "legacy web import tags while running a backend action",
+      options: {
+        ...baseOptions,
+        stackKey: "user-service",
+        action: "waitForChangeSet",
+      },
+      mutate(plan) {
+        plan.stacks[0].awsArguments.createChangeSet.push(
+          "--tags",
+          "Key=STAGE,Value=dev",
         );
       },
     },
