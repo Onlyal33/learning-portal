@@ -43,7 +43,7 @@ test("declares the installed Serverless v4 compatibility contract", () => {
   assert.equal(pluginPackageJson.peerDependencies.serverless, "~4.41.0");
   assert.equal(packageJson.devDependencies.serverless, "~4.41.0");
   assert.equal(packageJson.devDependencies["serverless-finch"], "4.0.4");
-  assert.equal(pluginPackageJson.engines.node, ">=22.12 <23");
+  assert.equal(pluginPackageJson.engines.node, ">=24.15.0 <25");
 });
 
 function domainStack() {

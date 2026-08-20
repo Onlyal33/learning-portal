@@ -6,7 +6,7 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": ">=22.12 <23"
+    "node": ">=24.15.0 <25"
   },
   "peerDependencies": {
     "serverless": "~4.41.0"

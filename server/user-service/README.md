@@ -192,12 +192,12 @@ create an isolated copy in the same AWS account.
 `.build/index.js`. Serverless packages that bundle plus a minimal
 `.build/package.json` declaring the ESM module type. The package gate extracts
 that ZIP into an isolated directory and loads all eight handlers, requires them
-to use Node 22, forbids plaintext JWT configuration and development files,
+to use Node 24, forbids plaintext JWT configuration and development files,
 verifies exact SSM IAM scope and disabled authorizer caching, and enforces
 compressed/uncompressed size ceilings. It also rejects any auto-scaling
 resource, unexpected GSI, or DynamoDB throughput other than fixed 1 RCU/1 WCU.
 
-The service declares `nodejs22.x` directly through the official Serverless
+The service declares `nodejs24.x` directly through the official Serverless
 Framework v4 distribution and accepts its required outbound access to Serverless
 services. Local commands use interactive authentication through the developer's
 personal Serverless account; that personal credential must not be copied into
