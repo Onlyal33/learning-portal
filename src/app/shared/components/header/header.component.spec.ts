@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import { createAuthServiceDouble } from '../../../../testing/component-test-doubles';

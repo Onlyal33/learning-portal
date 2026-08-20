@@ -1,3 +1,5 @@
+import type { MockedObject } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -18,23 +20,26 @@ function token(payload: object): string {
 }
 
 describe('AuthService initialization', () => {
-  const now = 1_000_000;
+  const now = 1000000;
   let storage: Storage;
-  let router: jasmine.SpyObj<Router>;
+  let router: MockedObject<Pick<Router, 'navigate' | 'parseUrl'>>;
   let httpTesting: HttpTestingController;
-  let userStore: jasmine.SpyObj<UserStoreService>;
+  let userStore: MockedObject<Pick<UserStoreService, 'clearUser'>>;
 
   beforeEach(() => {
-    jasmine.clock().install();
-    jasmine.clock().mockDate(new Date(now * 1000));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(now * 1000));
     storage = new MapStorage();
-    router = jasmine.createSpyObj<Router>('Router', ['navigate', 'parseUrl']);
-    router.parseUrl.and.callFake(
+    router = {
+      navigate: vi.fn().mockName('Router.navigate'),
+      parseUrl: vi.fn().mockName('Router.parseUrl'),
+    };
+    router.parseUrl.mockImplementation(
       (url) => ({ toString: () => url }) as ReturnType<Router['parseUrl']>,
     );
-    userStore = jasmine.createSpyObj<UserStoreService>('UserStoreService', [
-      'clearUser',
-    ]);
+    userStore = {
+      clearUser: vi.fn().mockName('UserStoreService.clearUser'),
+    };
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withXhr()),
@@ -52,13 +57,13 @@ describe('AuthService initialization', () => {
 
   afterEach(() => {
     httpTesting.verify();
-    jasmine.clock().uninstall();
+    vi.useRealTimers();
   });
 
   it('authorizes a persisted unexpired token', () => {
     storage.setItem('SESSION_TOKEN', token({ exp: now + 1 }));
 
-    expect(TestBed.inject(AuthService).isAuthorized).toBeTrue();
+    expect(TestBed.inject(AuthService).isAuthorized).toBe(true);
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
@@ -71,7 +76,7 @@ describe('AuthService initialization', () => {
     it(`rejects ${description} persisted auth and returns to login`, () => {
       storage.setItem('SESSION_TOKEN', invalidToken);
 
-      expect(TestBed.inject(AuthService).isAuthorized).toBeFalse();
+      expect(TestBed.inject(AuthService).isAuthorized).toBe(false);
       expect(storage.getItem('SESSION_TOKEN')).toBeNull();
       expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
@@ -86,7 +91,7 @@ describe('AuthService initialization', () => {
       .expectOne(`${environment.apiUrl}/auth/login`)
       .flush({ token: validToken });
 
-    expect(authService.isAuthorized).toBeTrue();
+    expect(authService.isAuthorized).toBe(true);
     expect(router.navigate).toHaveBeenCalledWith(['/home']);
   });
 
@@ -115,11 +120,11 @@ describe('AuthService initialization', () => {
     httpTesting
       .expectOne(`${environment.apiUrl}/auth/login`)
       .flush({ token: validToken });
-    router.navigate.calls.reset();
+    router.navigate.mockClear();
 
     authService.logout();
 
-    expect(authService.isAuthorized).toBeFalse();
+    expect(authService.isAuthorized).toBe(false);
     expect(storage.getItem('SESSION_TOKEN')).toBeNull();
     expect(userStore.clearUser).toHaveBeenCalledWith();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
@@ -131,7 +136,7 @@ describe('AuthService initialization', () => {
     );
     logout.error(new ProgressEvent('network failure'));
 
-    expect(authService.isAuthorized).toBeFalse();
+    expect(authService.isAuthorized).toBe(false);
     expect(storage.getItem('SESSION_TOKEN')).toBeNull();
   });
 
@@ -144,7 +149,7 @@ describe('AuthService initialization', () => {
     authService.logout();
     login.flush({ token: validToken });
 
-    expect(authService.isAuthorized).toBeFalse();
+    expect(authService.isAuthorized).toBe(false);
     expect(storage.getItem('SESSION_TOKEN')).toBeNull();
   });
 
@@ -165,7 +170,7 @@ describe('AuthService initialization', () => {
       .flush({ token: newToken });
     authService.invalidateSession(staleSession!);
 
-    expect(authService.isAuthorized).toBeTrue();
+    expect(authService.isAuthorized).toBe(true);
     expect(storage.getItem('SESSION_TOKEN')).toBe(newToken);
   });
 
@@ -185,12 +190,12 @@ describe('AuthService initialization', () => {
     httpTesting
       .expectOne(`${environment.apiUrl}/auth/login`)
       .flush({ token: validToken });
-    userStore.clearUser.calls.reset();
-    router.navigate.calls.reset();
+    userStore.clearUser.mockClear();
+    router.navigate.mockClear();
 
     authService.invalidateSession(staleSession!);
 
-    expect(authService.isAuthorized).toBeTrue();
+    expect(authService.isAuthorized).toBe(true);
     expect(storage.getItem('SESSION_TOKEN')).toBe(validToken);
     expect(userStore.clearUser).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
@@ -204,8 +209,8 @@ describe('AuthService initialization', () => {
     httpTesting
       .expectOne(`${environment.apiUrl}/auth/login`)
       .flush({ token: validToken });
-    userStore.clearUser.calls.reset();
-    router.navigate.calls.reset();
+    userStore.clearUser.mockClear();
+    router.navigate.mockClear();
 
     const session = authService.getValidSession();
     authService.invalidateSession(session!);
@@ -219,13 +224,13 @@ describe('AuthService initialization', () => {
     const validToken = token({ exp: now + 1 });
     storage.setItem('SESSION_TOKEN', validToken);
     const authService = TestBed.inject(AuthService);
-    jasmine.clock().mockDate(new Date((now + 1) * 1000));
+    vi.setSystemTime(new Date((now + 1) * 1000));
 
     expect(
       TestBed.runInInjectionContext(() => authorizedGuard(null!, [], null!)),
-    ).not.toBeTrue();
+    ).not.toBe(true);
 
-    expect(authService.isAuthorized).toBeFalse();
+    expect(authService.isAuthorized).toBe(false);
     expect(storage.getItem('SESSION_TOKEN')).toBeNull();
   });
 
@@ -243,7 +248,7 @@ describe('AuthService initialization', () => {
         .expectOne(`${environment.apiUrl}/auth/login`)
         .flush({ token: invalidToken });
 
-      expect(authService.isAuthorized).toBeFalse();
+      expect(authService.isAuthorized).toBe(false);
       expect(storage.getItem('SESSION_TOKEN')).toBeNull();
       expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });

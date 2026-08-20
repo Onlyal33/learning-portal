@@ -1,3 +1,5 @@
+import type { Mock, MockedObject } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -5,16 +7,21 @@ import { authorizedGuard } from './authorized.guard';
 import { notAuthorizedGuard } from './not-authorized.guard';
 
 describe('auth guards', () => {
-  let authService: { hasValidSession: jasmine.Spy; getLoginUrl: jasmine.Spy };
-  let router: jasmine.SpyObj<Router>;
+  let authService: {
+    hasValidSession: Mock;
+    getLoginUrl: Mock;
+  };
+  let router: MockedObject<Pick<Router, 'parseUrl'>>;
 
   beforeEach(() => {
     authService = {
-      hasValidSession: jasmine.createSpy().and.returnValue(false),
-      getLoginUrl: jasmine.createSpy().and.returnValue('/login'),
+      hasValidSession: vi.fn().mockReturnValue(false),
+      getLoginUrl: vi.fn().mockReturnValue('/login'),
     };
-    router = jasmine.createSpyObj<Router>('Router', ['parseUrl']);
-    router.parseUrl.and.callFake(
+    router = {
+      parseUrl: vi.fn().mockName('Router.parseUrl'),
+    };
+    router.parseUrl.mockImplementation(
       (url) => ({ toString: () => url }) as ReturnType<Router['parseUrl']>,
     );
     TestBed.configureTestingModule({
@@ -26,13 +33,13 @@ describe('auth guards', () => {
   });
 
   it('allows authorized routes only for valid authorized state', () => {
-    authService.hasValidSession.and.returnValue(true);
+    authService.hasValidSession.mockReturnValue(true);
 
     expect(
       TestBed.runInInjectionContext(() => authorizedGuard(null!, [], null!)),
-    ).toBeTrue();
+    ).toBe(true);
 
-    authService.hasValidSession.and.returnValue(false);
+    authService.hasValidSession.mockReturnValue(false);
 
     expect(
       TestBed.runInInjectionContext(() =>
@@ -42,13 +49,13 @@ describe('auth guards', () => {
   });
 
   it('allows public routes only when unauthorized', () => {
-    authService.hasValidSession.and.returnValue(false);
+    authService.hasValidSession.mockReturnValue(false);
 
     expect(
       TestBed.runInInjectionContext(() => notAuthorizedGuard(null!, null!)),
-    ).toBeTrue();
+    ).toBe(true);
 
-    authService.hasValidSession.and.returnValue(true);
+    authService.hasValidSession.mockReturnValue(true);
 
     expect(
       TestBed.runInInjectionContext(() =>

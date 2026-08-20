@@ -3,7 +3,6 @@
 const eslint = require("@eslint/js");
 const angular = require("angular-eslint");
 const prettier = require("eslint-config-prettier");
-const jasmine = require("eslint-plugin-jasmine");
 const globals = require("globals");
 const tseslint = require("typescript-eslint");
 
@@ -54,16 +53,9 @@ module.exports = tseslint.config(
     rules: {},
   },
   {
-    files: ["**/*.spec.ts"],
-    plugins: { jasmine },
-    languageOptions: { globals: globals.jasmine },
-    rules: jasmine.configs.recommended.rules,
-  },
-  {
     files: ["server/user-service/**/*.spec.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-      "jasmine/no-global-setup": "off",
     },
   },
   prettier,

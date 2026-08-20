@@ -1,3 +1,5 @@
+import type { Mock, MockedObject } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   HttpEvent,
   HttpErrorResponse,
@@ -26,38 +28,36 @@ function token(payload: object): string {
 }
 
 describe('tokenInterceptor', () => {
-  const now = 1_000_000;
+  const now = 1000000;
   let authService: {
     isAuthorized: boolean;
-    invalidateSession: jasmine.Spy;
-    getValidSession: jasmine.Spy;
+    invalidateSession: Mock;
+    getValidSession: Mock;
   };
 
   beforeEach(() => {
-    jasmine.clock().install();
-    jasmine.clock().mockDate(new Date(now * 1000));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(now * 1000));
     authService = {
       isAuthorized: true,
-      invalidateSession: jasmine.createSpy(),
-      getValidSession: jasmine.createSpy(),
+      invalidateSession: vi.fn(),
+      getValidSession: vi.fn(),
     };
     TestBed.configureTestingModule({
       providers: [{ provide: AuthService, useValue: authService }],
     });
   });
 
-  afterEach(() => jasmine.clock().uninstall());
+  afterEach(() => vi.useRealTimers());
 
   it('adds exactly one Bearer authorization header for a valid authorized token', () => {
     const validToken = token({ exp: now + 1 });
-    authService.getValidSession.and.returnValue(session(validToken));
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(of(new HttpResponse({ status: 200 })));
+    authService.getValidSession.mockReturnValue(session(validToken));
+    const next = vi.fn().mockReturnValue(of(new HttpResponse({ status: 200 })));
 
     invoke(next).subscribe();
 
-    const forwarded = next.calls.mostRecent().args[0] as HttpRequest<unknown>;
+    const forwarded = vi.mocked(next).mock.lastCall![0] as HttpRequest<unknown>;
 
     expect(forwarded.headers.get('Authorization')).toBe(`Bearer ${validToken}`);
     expect(
@@ -74,41 +74,37 @@ describe('tokenInterceptor', () => {
     ['at its expiry boundary', token({ exp: now })],
   ].forEach(([description]) => {
     it(`fails closed for ${description} tokens without invoking the handler`, () => {
-      authService.getValidSession.and.returnValue(null);
-      const next = jasmine.createSpy();
+      authService.getValidSession.mockReturnValue(null);
+      const next = vi.fn();
       let failure: unknown;
 
       invoke(next).subscribe({ error: (error) => (failure = error) });
 
       expect(next).not.toHaveBeenCalled();
       expect(authService.invalidateSession).not.toHaveBeenCalled();
-      expect(failure).toEqual(jasmine.any(Error));
+      expect(failure).toEqual(expect.any(Error));
     });
   });
 
   it('passes unauthenticated API requests through without Authorization', () => {
     authService.isAuthorized = false;
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(of(new HttpResponse({ status: 200 })));
+    const next = vi.fn().mockReturnValue(of(new HttpResponse({ status: 200 })));
 
     invoke(next).subscribe();
 
     expect(
-      (next.calls.mostRecent().args[0] as HttpRequest<unknown>).headers.has(
+      (vi.mocked(next).mock.lastCall![0] as HttpRequest<unknown>).headers.has(
         'Authorization',
       ),
-    ).toBeFalse();
+    ).toBe(false);
   });
 
   it('invalidates only the session token attached to an API 401', () => {
     const response = new HttpErrorResponse({ status: 401 });
     const validToken = token({ exp: now + 1 });
     const validSession = session(validToken);
-    authService.getValidSession.and.returnValue(validSession);
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(throwError(() => response));
+    authService.getValidSession.mockReturnValue(validSession);
+    const next = vi.fn().mockReturnValue(throwError(() => response));
     let failure: unknown;
 
     invoke(next).subscribe({ error: (error) => (failure = error) });
@@ -119,38 +115,32 @@ describe('tokenInterceptor', () => {
 
   it('does not attach a token or invalidate for an external 401', () => {
     const response = new HttpErrorResponse({ status: 401 });
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(throwError(() => response));
+    const next = vi.fn().mockReturnValue(throwError(() => response));
 
     invoke(next, 'https://example.com/users/me').subscribe({ error: () => {} });
 
-    const forwarded = next.calls.mostRecent().args[0] as HttpRequest<unknown>;
+    const forwarded = vi.mocked(next).mock.lastCall![0] as HttpRequest<unknown>;
 
-    expect(forwarded.headers.has('Authorization')).toBeFalse();
+    expect(forwarded.headers.has('Authorization')).toBe(false);
     expect(authService.invalidateSession).not.toHaveBeenCalled();
   });
 
   it('does not treat an API prefix-confusion URL as an API request', () => {
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(of(new HttpResponse({ status: 200 })));
+    const next = vi.fn().mockReturnValue(of(new HttpResponse({ status: 200 })));
     const confusedUrl = `${environment.apiUrl}-attacker/users/me`;
 
     invoke(next, confusedUrl).subscribe();
 
-    const forwarded = next.calls.mostRecent().args[0] as HttpRequest<unknown>;
+    const forwarded = vi.mocked(next).mock.lastCall![0] as HttpRequest<unknown>;
 
-    expect(forwarded.headers.has('Authorization')).toBeFalse();
+    expect(forwarded.headers.has('Authorization')).toBe(false);
   });
 
   it('delegates duplicate API 401 handling without directly mutating storage', () => {
     const response = new HttpErrorResponse({ status: 401 });
     const validToken = token({ exp: now + 1 });
-    authService.getValidSession.and.returnValue(session(validToken));
-    const next = jasmine
-      .createSpy()
-      .and.returnValue(throwError(() => response));
+    authService.getValidSession.mockReturnValue(session(validToken));
+    const next = vi.fn().mockReturnValue(throwError(() => response));
 
     invoke(next).subscribe({ error: () => {} });
     invoke(next).subscribe({ error: () => {} });
@@ -158,7 +148,7 @@ describe('tokenInterceptor', () => {
     expect(authService.invalidateSession).toHaveBeenCalledTimes(2);
   });
 
-  function invoke(next: jasmine.Spy, url = `${environment.apiUrl}/protected`) {
+  function invoke(next: Mock, url = `${environment.apiUrl}/protected`) {
     return TestBed.runInInjectionContext(() =>
       tokenInterceptor(new HttpRequest('GET', url), next),
     );
@@ -170,20 +160,18 @@ describe('tokenInterceptor', () => {
 });
 
 describe('tokenInterceptor session generations', () => {
-  const now = 1_000_000;
+  const now = 1000000;
   let storage: Storage;
-  let router: jasmine.SpyObj<Router>;
-  let userStore: jasmine.SpyObj<UserStoreService>;
+  let router: MockedObject<Pick<Router, 'navigate'>>;
+  let userStore: MockedObject<Pick<UserStoreService, 'clearUser'>>;
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
-    jasmine.clock().install();
-    jasmine.clock().mockDate(new Date(now * 1000));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(now * 1000));
     storage = new MapStorage();
-    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
-    userStore = jasmine.createSpyObj<UserStoreService>('UserStoreService', [
-      'clearUser',
-    ]);
+    router = { navigate: vi.fn().mockName('Router.navigate') };
+    userStore = { clearUser: vi.fn().mockName('UserStoreService.clearUser') };
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withXhr()),
@@ -201,14 +189,14 @@ describe('tokenInterceptor session generations', () => {
 
   afterEach(() => {
     httpTesting.verify();
-    jasmine.clock().uninstall();
+    vi.useRealTimers();
   });
 
   it('does not let a late 401 clear an identical-token session from a newer generation', () => {
     const authService = TestBed.inject(AuthService);
     const validToken = token({ exp: now + 60, sub: 'learner' });
     const lateResponse = new Subject<HttpEvent<unknown>>();
-    const next = jasmine.createSpy().and.returnValue(lateResponse);
+    const next = vi.fn().mockReturnValue(lateResponse);
 
     authService.login({ email: 'learner@example.com', password: 'password' });
     httpTesting
@@ -222,7 +210,7 @@ describe('tokenInterceptor session generations', () => {
     ).subscribe({ error: () => {} });
 
     expect(
-      (next.calls.mostRecent().args[0] as HttpRequest<unknown>).headers.get(
+      (vi.mocked(next).mock.lastCall![0] as HttpRequest<unknown>).headers.get(
         'Authorization',
       ),
     ).toBe(`Bearer ${validToken}`);
@@ -233,12 +221,12 @@ describe('tokenInterceptor session generations', () => {
     httpTesting
       .expectOne(`${environment.apiUrl}/auth/login`)
       .flush({ token: validToken });
-    userStore.clearUser.calls.reset();
-    router.navigate.calls.reset();
+    userStore.clearUser.mockClear();
+    router.navigate.mockClear();
 
     lateResponse.error(new HttpErrorResponse({ status: 401 }));
 
-    expect(authService.isAuthorized).toBeTrue();
+    expect(authService.isAuthorized).toBe(true);
     expect(storage.getItem('SESSION_TOKEN')).toBe(validToken);
     expect(userStore.clearUser).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();

@@ -1,3 +1,5 @@
+import type { MockedObject } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { GetUserResponse } from '../../../../server/user-service/models/user.model';
@@ -16,16 +18,21 @@ const learner = (email: string): GetUserResponse => ({
 });
 
 describe('UserStoreService session ownership', () => {
-  let userService: jasmine.SpyObj<UserService>;
+  let userService: MockedObject<
+    Pick<
+      UserService,
+      'getUser' | 'deleteUser' | 'updateUser' | 'updatePassword'
+    >
+  >;
   let store: UserStoreService;
 
   beforeEach(() => {
-    userService = jasmine.createSpyObj<UserService>('UserService', [
-      'getUser',
-      'deleteUser',
-      'updateUser',
-      'updatePassword',
-    ]);
+    userService = {
+      getUser: vi.fn().mockName('UserService.getUser'),
+      deleteUser: vi.fn().mockName('UserService.deleteUser'),
+      updateUser: vi.fn().mockName('UserService.updateUser'),
+      updatePassword: vi.fn().mockName('UserService.updatePassword'),
+    };
     TestBed.configureTestingModule({
       providers: [
         UserStoreService,
@@ -37,7 +44,7 @@ describe('UserStoreService session ownership', () => {
 
   it('does not let a response from a cleared session repopulate user data', () => {
     const response = new Subject<GetUserResponse>();
-    userService.getUser.and.returnValue(response);
+    userService.getUser.mockReturnValue(response);
     let current: GetUserResponse | undefined;
     store.user$.subscribe((user) => (current = user));
 
@@ -51,7 +58,7 @@ describe('UserStoreService session ownership', () => {
   it('accepts only the newest overlapping user load', () => {
     const older = new Subject<GetUserResponse>();
     const newer = new Subject<GetUserResponse>();
-    userService.getUser.and.returnValues(older, newer);
+    userService.getUser.mockReturnValueOnce(older).mockReturnValueOnce(newer);
     let current: GetUserResponse | undefined;
     store.user$.subscribe((user) => (current = user));
 

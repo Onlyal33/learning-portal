@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { beforeEach, describe, expect, it } from 'vitest';
 import { AboutPageComponent } from './about-page.component';
 
 describe('AboutPageComponent', () => {
@@ -8,9 +8,8 @@ describe('AboutPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AboutPageComponent]
-    })
-    .compileComponents();
+      imports: [AboutPageComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AboutPageComponent);
     component = fixture.componentInstance;

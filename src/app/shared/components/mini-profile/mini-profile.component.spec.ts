@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MiniProfileComponent } from './mini-profile.component';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -13,7 +13,10 @@ describe('MiniProfileComponent', () => {
       imports: [MiniProfileComponent],
       providers: [
         provideRouter([]),
-        { provide: AuthService, useValue: { logout: jasmine.createSpy('logout') } },
+        {
+          provide: AuthService,
+          useValue: { logout: vi.fn().mockName('logout') },
+        },
       ],
     }).compileComponents();
 

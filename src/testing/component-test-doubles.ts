@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../app/auth/services/auth.service';
 import { SecureDataService } from '../app/shared/services/secure-data.service';
@@ -20,9 +21,9 @@ export function createAuthServiceDouble(): Pick<
 > {
   return {
     isAuthorized: false,
-    login: jasmine.createSpy('login'),
-    logout: jasmine.createSpy('logout'),
-    register: jasmine.createSpy('register'),
+    login: vi.fn().mockName('login'),
+    logout: vi.fn().mockName('logout'),
+    register: vi.fn().mockName('register'),
   };
 }
 
@@ -32,7 +33,7 @@ export function createUserStoreServiceDouble(): Pick<
 > {
   return {
     user$: new BehaviorSubject(testUser).asObservable(),
-    updateUser: jasmine.createSpy('updateUser'),
+    updateUser: vi.fn().mockName('updateUser'),
   };
 }
 
@@ -41,9 +42,10 @@ export function createSecureDataServiceDouble(): Pick<
   'getPassword' | 'clearPassword'
 > {
   return {
-    getPassword: jasmine
-      .createSpy('getPassword')
-      .and.returnValue('temporary-password'),
-    clearPassword: jasmine.createSpy('clearPassword'),
+    getPassword: vi
+      .fn()
+      .mockName('getPassword')
+      .mockReturnValue('temporary-password'),
+    clearPassword: vi.fn().mockName('clearPassword'),
   };
 }

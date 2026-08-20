@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
@@ -18,7 +19,7 @@ describe('JoinBoxComponent', () => {
     fixture.componentRef.setInput('header', 'Start learning');
     fixture.componentRef.setInput('text', 'Learn at your own pace.');
     fixture.componentRef.setInput('src', 'join/trainers.png');
-    fixture.componentRef.setInput('onClick', jasmine.createSpy('onClick'));
+    fixture.componentRef.setInput('onClick', vi.fn().mockName('onClick'));
     fixture.detectChanges();
   });
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { UserStoreService } from '../../user/services/user-store.service';
 import { createUserStoreServiceDouble } from '../../../testing/component-test-doubles';
 
@@ -12,10 +13,7 @@ describe('MyAccountPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MyAccountPageComponent],
       providers: [
-        {
-          provide: UserStoreService,
-          useValue: createUserStoreServiceDouble(),
-        },
+        { provide: UserStoreService, useValue: createUserStoreServiceDouble() },
       ],
     }).compileComponents();
 

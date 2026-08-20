@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideRouter } from '@angular/router';
 import { SecureDataService } from '../../shared/services/secure-data.service';
 import { UserStoreService } from '../../user/services/user-store.service';

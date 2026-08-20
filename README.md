@@ -64,7 +64,9 @@ change-set review.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `npm test` to execute the unit tests with Vitest through the Angular CLI.
+For a one-shot coverage report, run
+`npm test -- --watch=false --coverage`.
 
 ## Running end-to-end tests
 
