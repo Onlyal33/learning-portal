@@ -1,5 +1,5 @@
 service: learning-app-cloudfront
-frameworkVersion: "3"
+frameworkVersion: "~4.41.0"
 
 provider:
   name: aws

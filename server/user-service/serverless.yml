@@ -1,10 +1,9 @@
 service: user-service
-frameworkVersion: "3"
+frameworkVersion: "~4.41.0"
 
 provider:
   name: aws
-  # Serverless v3 schema placeholder; resources.extensions overrides generated Lambdas to Node 22 pending authenticated v4 migration.
-  runtime: nodejs20.x
+  runtime: nodejs22.x
   stage: dev
   region: us-east-1
   environment:
@@ -32,6 +31,8 @@ provider:
             - arn:aws:dynamodb:${self:provider.region}:*:table/BlacklistedTokensTable
   httpApi:
     cors:
+      allowedOrigins:
+        - "*"
       allowedHeaders:
         - content-type
         - x-amz-date
@@ -291,37 +292,11 @@ resources:
           AttributeName: "expiresAt"
           Enabled: true
 
-  extensions:
-    JwtAuthorizerLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    RegisterUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    LoginUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    LogoutUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    GetCurrentUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    DeleteCurrentUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    UpdateCurrentUserLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-    UpdatePasswordLambdaFunction:
-      Properties:
-        Runtime: nodejs22.x
-
 plugins:
   - serverless-offline
 
 package:
   patterns:
-    - '!**'
-    - '.build/index.js'
-    - '.build/package.json'
+    - "!**"
+    - ".build/index.js"
+    - ".build/package.json"

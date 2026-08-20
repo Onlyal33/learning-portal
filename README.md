@@ -18,6 +18,16 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Deployment safety
 
+Deployment commands use the official Serverless Framework v4 distribution and
+accept its required outbound access to Serverless services. Local commands use
+interactive authentication through the developer's personal Serverless account.
+Do not copy that personal credential into automation.
+
+When GitHub Actions deployment is added, create a dedicated non-interactive
+Serverless credential and expose it only as the `SERVERLESS_ACCESS_KEY` secret of
+a protected GitHub Actions environment. Never commit the key or reuse it outside
+that deployment environment.
+
 `npm run client:deploy` uploads the built client through Serverless Finch without
 emptying the bucket or changing bucket configuration, policies, or CORS. It still
 replaces any existing object whose key is present in the built client.

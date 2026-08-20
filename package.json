@@ -21,7 +21,7 @@
     "cloudfront:update:build:deploy:nc": "npm run cloudfront:setup && npm run cloudfront:build:deploy:nc",
     "retained-resources:plan": "node scripts/retained-resource-recovery.mjs",
     "retained-resources:run": "node scripts/retained-resource-recovery.mjs run",
-    "test:deploy-prereqs": "node --test serverless-single-page-app-plugin/index.test.js scripts/retained-resource-recovery.test.mjs",
+    "test:deploy-prereqs": "node --test serverless-single-page-app-plugin/index.test.js && node --test scripts/retained-resource-recovery.test.mjs",
     "lint": "ng lint",
     "prepare": "husky"
   },
@@ -72,8 +72,8 @@
     "lint-staged": "^15.2.9",
     "prettier": "^3.3.3",
     "pretty-quick": "^4.0.0",
-    "serverless": "^3.39.0",
-    "serverless-finch": "^4.0.4",
+    "serverless": "~4.41.0",
+    "serverless-finch": "4.0.4",
     "serverless-single-page-app-plugin": "file:serverless-single-page-app-plugin",
     "typescript": "~5.9.3"
   },

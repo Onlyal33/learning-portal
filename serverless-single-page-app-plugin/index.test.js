@@ -6,25 +6,45 @@ const path = require("node:path");
 const test = require("node:test");
 const ServerlessPlugin = require("./index.js");
 const packageJson = require("../package.json");
+const pluginPackageJson = require("./package.json");
+const serverlessPackagePath = require.resolve("serverless/package.json");
+const serverlessEntry = path.resolve(
+  path.dirname(serverlessPackagePath),
+  require(serverlessPackagePath).bin.serverless,
+);
 
 function createPlugin(request) {
   const logs = [];
+  const log = (message) => logs.push(message);
   const provider = {
     naming: { getStackName: () => "learning-app-cloudfront-test" },
     request,
   };
   const plugin = new ServerlessPlugin(
     {
-      cli: { log: (message) => logs.push(message) },
+      cli: {
+        log: () => {
+          throw new Error("legacy Serverless CLI logging must not be used");
+        },
+      },
       getProvider: (name) => {
         assert.equal(name, "aws");
         return provider;
       },
     },
     {},
+    { log },
   );
   return { plugin, logs };
 }
+
+test("declares the installed Serverless v4 compatibility contract", () => {
+  assert.equal(pluginPackageJson.main, "index.js");
+  assert.equal(pluginPackageJson.peerDependencies.serverless, "~4.41.0");
+  assert.equal(packageJson.devDependencies.serverless, "~4.41.0");
+  assert.equal(packageJson.devDependencies["serverless-finch"], "4.0.4");
+  assert.equal(pluginPackageJson.engines.node, ">=22.12 <23");
+});
 
 function domainStack() {
   return {
@@ -48,17 +68,87 @@ test("keeps client deployment non-destructive without changing its safety flags"
   );
 });
 
+test("registers both custom command lifecycles and dispatches their hooks", async () => {
+  const calls = [];
+  const { plugin } = createPlugin(async (...args) => {
+    calls.push(args);
+    if (args[1] === "describeStacks") return domainStack();
+    if (args[1] === "listDistributions") {
+      return {
+        DistributionList: {
+          Items: [{ Id: "E123", DomainName: "d111111abcdef8.cloudfront.net" }],
+        },
+      };
+    }
+    return {};
+  });
+
+  assert.deepEqual(plugin.commands.domainInfo.lifecycleEvents, ["domainInfo"]);
+  assert.deepEqual(plugin.commands.invalidateCloudFrontCache.lifecycleEvents, [
+    "invalidateCache",
+  ]);
+  assert.deepEqual(Object.keys(plugin.hooks).sort(), [
+    "domainInfo:domainInfo",
+    "invalidateCloudFrontCache:invalidateCache",
+  ]);
+
+  await plugin.hooks["domainInfo:domainInfo"]();
+  await plugin.hooks["invalidateCloudFrontCache:invalidateCache"]();
+  assert.deepEqual(
+    calls.map((call) => call[1]),
+    [
+      "describeStacks",
+      "describeStacks",
+      "listDistributions",
+      "createInvalidation",
+    ],
+  );
+});
+
+test("loads both custom commands through the installed Serverless v4 CLI", () => {
+  const serviceRoot = path.join(__dirname, "..");
+  for (const [command, usage] of [
+    [
+      "domainInfo",
+      /Fetches and prints out the deployed CloudFront domain names/,
+    ],
+    ["invalidateCloudFrontCache", /Invalidates CloudFront cache/],
+  ]) {
+    const output = execFileSync(
+      process.execPath,
+      [serverlessEntry, command, "--help"],
+      {
+        cwd: serviceRoot,
+        encoding: "utf8",
+      },
+    );
+    assert.match(output, usage);
+  }
+});
+
+test("loads the pinned Finch deploy command through the installed Serverless v4 CLI", () => {
+  const serviceRoot = path.join(__dirname, "..");
+  const output = execFileSync(
+    process.execPath,
+    [serverlessEntry, "client", "deploy", "--help"],
+    {
+      cwd: serviceRoot,
+      encoding: "utf8",
+    },
+  );
+  assert.match(output, /client deploy\s+Deploy serverless client code/);
+  assert.match(output, /--delete-contents/);
+  assert.match(output, /--config-change/);
+  assert.match(output, /--policy-change/);
+  assert.match(output, /--cors-change/);
+});
+
 test("retains the rendered web bucket on deletion and replacement", () => {
   const serviceRoot = path.join(__dirname, "..");
   const rendered = JSON.parse(
     execFileSync(
       process.execPath,
-      [
-        path.join(serviceRoot, "node_modules/serverless/bin/serverless.js"),
-        "print",
-        "--format",
-        "json",
-      ],
+      [serverlessEntry, "print", "--format", "json"],
       { cwd: serviceRoot, encoding: "utf8" },
     ),
   );
