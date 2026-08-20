@@ -1,5 +1,10 @@
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 
 import {
@@ -43,6 +48,7 @@ const getlabelText = function getlabelText(label: string): string {
     MatSlideToggleModule,
   ],
   templateUrl: './profile.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './profile.component.scss',
 })
 export class ProfileComponent implements OnInit {

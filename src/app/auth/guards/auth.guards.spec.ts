@@ -29,14 +29,14 @@ describe('auth guards', () => {
     authService.hasValidSession.and.returnValue(true);
 
     expect(
-      TestBed.runInInjectionContext(() => authorizedGuard(null!, [])),
+      TestBed.runInInjectionContext(() => authorizedGuard(null!, [], null!)),
     ).toBeTrue();
 
     authService.hasValidSession.and.returnValue(false);
 
     expect(
       TestBed.runInInjectionContext(() =>
-        authorizedGuard(null!, []),
+        authorizedGuard(null!, [], null!),
       )?.toString(),
     ).toBe('/login');
   });

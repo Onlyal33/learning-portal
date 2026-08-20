@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -37,7 +37,7 @@ describe('AuthService initialization', () => {
     ]);
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         AuthService,
         SessionStorageService,
@@ -112,7 +112,9 @@ describe('AuthService initialization', () => {
     const validToken = token({ exp: now + 60 });
     storage.setItem('SESSION_TOKEN', validToken);
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     router.navigate.calls.reset();
 
     authService.logout();
@@ -124,7 +126,9 @@ describe('AuthService initialization', () => {
 
     const logout = httpTesting.expectOne(`${environment.apiUrl}/auth/logout`);
 
-    expect(logout.request.headers.get('Authorization')).toBe(`Bearer ${validToken}`);
+    expect(logout.request.headers.get('Authorization')).toBe(
+      `Bearer ${validToken}`,
+    );
     logout.error(new ProgressEvent('network failure'));
 
     expect(authService.isAuthorized).toBeFalse();
@@ -150,11 +154,15 @@ describe('AuthService initialization', () => {
     const newToken = token({ exp: now + 60, sub: 'new' });
 
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: oldToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: oldToken });
     const staleSession = authService.getValidSession();
 
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: newToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: newToken });
     authService.invalidateSession(staleSession!);
 
     expect(authService.isAuthorized).toBeTrue();
@@ -166,13 +174,17 @@ describe('AuthService initialization', () => {
     const validToken = token({ exp: now + 60, sub: 'learner' });
 
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     const staleSession = authService.getValidSession();
 
     authService.logout();
     httpTesting.expectOne(`${environment.apiUrl}/auth/logout`).flush({});
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     userStore.clearUser.calls.reset();
     router.navigate.calls.reset();
 
@@ -189,7 +201,9 @@ describe('AuthService initialization', () => {
     const validToken = token({ exp: now + 60 });
 
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     userStore.clearUser.calls.reset();
     router.navigate.calls.reset();
 
@@ -208,7 +222,7 @@ describe('AuthService initialization', () => {
     jasmine.clock().mockDate(new Date((now + 1) * 1000));
 
     expect(
-      TestBed.runInInjectionContext(() => authorizedGuard(null!, [])),
+      TestBed.runInInjectionContext(() => authorizedGuard(null!, [], null!)),
     ).not.toBeTrue();
 
     expect(authService.isAuthorized).toBeFalse();

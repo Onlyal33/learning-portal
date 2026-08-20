@@ -1,4 +1,9 @@
-import { Component, Input, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
@@ -7,6 +12,7 @@ import { Router } from '@angular/router';
   selector: 'app-join-box',
   imports: [ButtonComponent, NgOptimizedImage],
   templateUrl: './join-box.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './join-box.component.scss',
 })
 export class JoinBoxComponent {

@@ -1,4 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -23,6 +28,7 @@ import { AuthService } from '../../auth/services/auth.service';
     PasswordToggleDirective,
   ],
   templateUrl: './login-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login-page.component.scss',
 })
 export class LoginPageComponent implements OnInit {

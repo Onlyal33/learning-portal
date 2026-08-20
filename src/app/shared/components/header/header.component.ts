@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -8,6 +8,7 @@ import { AuthService } from '../../../auth/services/auth.service';
   selector: 'app-header',
   imports: [ButtonComponent, RouterLink, RouterLinkActive],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
