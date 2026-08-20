@@ -303,9 +303,12 @@ const authorizers = Object.values(template.Resources).filter(
 );
 if (
   authorizers.length !== 1 ||
-  authorizers[0].Properties.AuthorizerResultTtlInSeconds !== 0
+  authorizers[0].Properties.AuthorizerResultTtlInSeconds !== 0 ||
+  authorizers[0].Properties.AuthorizerType !== "REQUEST" ||
+  authorizers[0].Properties.AuthorizerPayloadFormatVersion !== "2.0" ||
+  authorizers[0].Properties.EnableSimpleResponses === true
 ) {
-  fail("HTTP API authorizer caching is not disabled");
+  fail("HTTP API authorizer contract is not canonical");
 }
 
 const expectedCors = {
@@ -347,6 +350,21 @@ try {
     if (typeof handlers[name] !== "function") {
       fail(`extracted Lambda archive is missing handler: ${name}`);
     }
+  }
+  if (handlers.jwtAuthorizer.length > 2) {
+    fail("extracted JWT authorizer uses a callback-based handler signature");
+  }
+  let authorizerRejection;
+  try {
+    await handlers.jwtAuthorizer(
+      { type: "REQUEST", headers: {}, routeArn: "arn:aws:execute-api:test" },
+      {},
+    );
+  } catch (error) {
+    authorizerRejection = error;
+  }
+  if (authorizerRejection?.message !== "Unauthorized") {
+    fail("extracted JWT authorizer is not an async Unauthorized handler");
   }
 } finally {
   rmSync(extractionDirectory, { recursive: true, force: true });

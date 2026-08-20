@@ -59,5 +59,12 @@ module.exports = tseslint.config(
     languageOptions: { globals: globals.jasmine },
     rules: jasmine.configs.recommended.rules,
   },
+  {
+    files: ["server/user-service/**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "jasmine/no-global-setup": "off",
+    },
+  },
   prettier,
 );

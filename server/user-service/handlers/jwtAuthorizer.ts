@@ -1,7 +1,7 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import {
-  APIGatewayAuthorizerResult,
   APIGatewayRequestAuthorizerEventV2,
+  APIGatewayRequestIAMAuthorizerV2WithContextHandler,
   StatementEffect,
 } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
@@ -22,14 +22,21 @@ const isTokenBlacklisted = async (token: string): Promise<boolean> => {
   return !!result.Item;
 };
 
-const jwtAuthorizer = async (
-  event: APIGatewayRequestAuthorizerEventV2,
-  _ctx: object,
-  cb: (err: string | null, policy?: APIGatewayAuthorizerResult) => void,
-) => {
+type AuthorizerContext = {
+  userId: string;
+  token: string;
+  expiresAt: number;
+};
+
+const unauthorized = (): never => {
+  throw new Error('Unauthorized');
+};
+
+const jwtAuthorizer: APIGatewayRequestIAMAuthorizerV2WithContextHandler<
+  AuthorizerContext
+> = async (event: APIGatewayRequestAuthorizerEventV2) => {
   if (!event.type || event.type !== 'REQUEST') {
-    cb('Unauthorized: Invalid event type');
-    return;
+    return unauthorized();
   }
 
   try {
@@ -38,8 +45,7 @@ const jwtAuthorizer = async (
     const match = authorizationHeader?.match(/^Bearer ([^\s]+)$/i);
 
     if (!match || match[0] !== authorizationHeader) {
-      cb('Unauthorized');
-      return;
+      return unauthorized();
     }
 
     const token = match[1];
@@ -56,17 +62,15 @@ const jwtAuthorizer = async (
       !Number.isFinite(decoded.exp) ||
       decoded.exp <= Math.floor(Date.now() / 1000)
     ) {
-      cb('Unauthorized');
-      return;
+      return unauthorized();
     }
 
     const blacklisted = await isTokenBlacklisted(token);
     if (blacklisted) {
-      cb('Unauthorized');
-      return;
+      return unauthorized();
     }
 
-    const policy: APIGatewayAuthorizerResult = {
+    return {
       principalId: String(decoded.id),
       policyDocument: {
         Version: '2012-10-17',
@@ -84,10 +88,8 @@ const jwtAuthorizer = async (
         expiresAt: decoded.exp,
       },
     };
-
-    cb(null, policy);
-  } catch (error) {
-    cb('Unauthorized');
+  } catch {
+    return unauthorized();
   }
 };
 
