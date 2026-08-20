@@ -58,6 +58,11 @@ npm run package -- --param=jwtSecretParameter=/learning-portal/dev/jwt-secret
 Never pass the JWT value to Serverless. The generated template must contain only
 the parameter name.
 
+`npm run offline` supplies that same non-sensitive development parameter name
+while starting the local HTTP emulator. Handler calls still use the configured
+AWS SDK clients, so exercise them only with the intended local or development
+service access.
+
 ## Zero-additional-charge JWT parameter
 
 Create the JWT value outside CloudFormation as an SSM Parameter Store
@@ -181,19 +186,24 @@ races.
 The table names are fixed rather than stage-qualified, so `--stage` does not
 create an isolated copy in the same AWS account.
 
-## Packaging and deferred Serverless v4 migration
+## Packaging and Serverless v4
 
 `scripts/build.mjs` type-checks and bundles the locked runtime dependencies into
 `.build/index.js`. Serverless packages that bundle plus a minimal
 `.build/package.json` declaring the ESM module type. The package gate extracts
 that ZIP into an isolated directory and loads all eight handlers, requires them
-to use Node 22, forbids plaintext JWT configuration and development files,
+to use Node 24, forbids plaintext JWT configuration and development files,
 verifies exact SSM IAM scope and disabled authorizer caching, and enforces
 compressed/uncompressed size ceilings. It also rejects any auto-scaling
 resource, unexpected GSI, or DynamoDB throughput other than fixed 1 RCU/1 WCU.
 
-Serverless v3 does not recognize `nodejs22.x` in its provider schema. The
-provider runtime remains a compatibility placeholder while generated Lambda
-resources are explicitly overridden to Node 22. Serverless v4 migration remains
-separate because it requires CLI authentication; do not combine it with this
-stabilization release.
+The service declares `nodejs24.x` directly through the official Serverless
+Framework v4 distribution and accepts its required outbound access to Serverless
+services. Local commands use interactive authentication through the developer's
+personal Serverless account; that personal credential must not be copied into
+automation.
+
+When GitHub Actions deployment is added, create a dedicated non-interactive
+Serverless credential and expose it only as the `SERVERLESS_ACCESS_KEY` secret of
+a protected GitHub Actions environment. Never commit the key or reuse it outside
+that deployment environment.

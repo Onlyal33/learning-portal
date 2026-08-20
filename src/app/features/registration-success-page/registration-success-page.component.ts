@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Router } from '@angular/router';
 import { map, Observable } from 'rxjs';
@@ -9,6 +15,7 @@ import { SecureDataService } from '../../shared/services/secure-data.service';
   selector: 'app-registration-success-page',
   imports: [ButtonComponent],
   templateUrl: './registration-success-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './registration-success-page.component.scss',
 })
 export class RegistrationSuccessPageComponent implements OnInit, OnDestroy {

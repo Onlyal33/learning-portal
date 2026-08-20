@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { BoxComponent } from '../../shared/components/box/box.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { map, Observable } from 'rxjs';
   selector: 'app-home-user-page',
   imports: [BoxComponent, ButtonComponent],
   templateUrl: './home-user-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './home-user-page.component.scss',
 })
 export class HomeUserPageComponent {

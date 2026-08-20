@@ -4,6 +4,7 @@ import {
   HttpRequest,
   HttpResponse,
   provideHttpClient,
+  withXhr,
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -41,9 +42,7 @@ describe('tokenInterceptor', () => {
       getValidSession: jasmine.createSpy(),
     };
     TestBed.configureTestingModule({
-      providers: [
-        { provide: AuthService, useValue: authService },
-      ],
+      providers: [{ provide: AuthService, useValue: authService }],
     });
   });
 
@@ -187,7 +186,7 @@ describe('tokenInterceptor session generations', () => {
     ]);
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         AuthService,
         SessionStorageService,
@@ -212,9 +211,14 @@ describe('tokenInterceptor session generations', () => {
     const next = jasmine.createSpy().and.returnValue(lateResponse);
 
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     TestBed.runInInjectionContext(() =>
-      tokenInterceptor(new HttpRequest('GET', `${environment.apiUrl}/protected`), next),
+      tokenInterceptor(
+        new HttpRequest('GET', `${environment.apiUrl}/protected`),
+        next,
+      ),
     ).subscribe({ error: () => {} });
 
     expect(
@@ -226,7 +230,9 @@ describe('tokenInterceptor session generations', () => {
     authService.logout();
     httpTesting.expectOne(`${environment.apiUrl}/auth/logout`).flush({});
     authService.login({ email: 'learner@example.com', password: 'password' });
-    httpTesting.expectOne(`${environment.apiUrl}/auth/login`).flush({ token: validToken });
+    httpTesting
+      .expectOne(`${environment.apiUrl}/auth/login`)
+      .flush({ token: validToken });
     userStore.clearUser.calls.reset();
     router.navigate.calls.reset();
 

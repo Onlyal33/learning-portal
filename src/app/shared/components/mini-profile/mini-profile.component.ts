@@ -1,5 +1,5 @@
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { Profile } from '../../models/user.model';
   selector: 'app-mini-profile',
   imports: [ButtonComponent, MatSlideToggleModule],
   templateUrl: './mini-profile.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mini-profile.component.scss',
 })
 export class MiniProfileComponent {

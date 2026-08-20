@@ -1,5 +1,10 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -25,6 +30,7 @@ import { AuthService } from '../../auth/services/auth.service';
     NgOptimizedImage,
   ],
   templateUrl: './registration-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './registration-page.component.scss',
 })
 export class RegistrationPageComponent implements OnInit {

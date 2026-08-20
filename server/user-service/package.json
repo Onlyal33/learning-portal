@@ -12,7 +12,7 @@
     "prepackage": "npm run build",
     "package": "serverless package",
     "preoffline": "npm run build",
-    "offline": "serverless offline",
+    "offline": "serverless offline --param=jwtSecretParameter=/learning-portal/dev/jwt-secret",
     "identity:backfill:audit": "node scripts/identity-backfill.mjs audit",
     "identity:backfill:apply": "node scripts/identity-backfill.mjs apply",
     "test:identity-backfill": "node --test scripts/identity-backfill.test.mjs",
@@ -26,11 +26,11 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^22.20.1",
+    "@types/node": "^24.13.3",
     "esbuild": "^0.28.2",
     "jest": "^29.7.0",
-    "serverless": "^3.40.0",
-    "serverless-offline": "^13.10.1",
+    "serverless": "^4.41.0",
+    "serverless-offline": "^14.8.0",
     "ts-jest": "^29.4.12",
     "typescript": "~5.9.3"
   },
@@ -42,7 +42,7 @@
     "jsonwebtoken": "^9.0.3"
   },
   "engines": {
-    "node": ">=22.12 <23"
+    "node": ">=24.15.0 <25"
   },
-  "packageManager": "npm@10.9.4"
+  "packageManager": "npm@11.17.0"
 }

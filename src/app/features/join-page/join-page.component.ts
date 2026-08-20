@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { JoinBoxComponent } from '../../shared/components/join-box/join-box.component';
 import { Router } from '@angular/router';
 
@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
   selector: 'app-join-page',
   imports: [JoinBoxComponent],
   templateUrl: './join-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './join-page.component.scss',
 })
 export class JoinPageComponent {
