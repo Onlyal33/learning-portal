@@ -9,7 +9,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { assertNoExternalIamPolicies } from './scripts/package-invariants.mjs';
+import {
+  assertDynamoDbTablesRetained,
+  assertNoExternalIamPolicies,
+} from './scripts/package-invariants.mjs';
 
 const fail = (message) => {
   throw new Error(message);
@@ -76,6 +79,7 @@ const template = JSON.parse(
   ),
 );
 assertNoExternalIamPolicies(template);
+assertDynamoDbTablesRetained(template);
 const lambdaResources = Object.entries(template.Resources).filter(
   ([, resource]) => resource.Type === 'AWS::Lambda::Function',
 );
@@ -289,6 +293,24 @@ if (
   authorizers[0].Properties.AuthorizerResultTtlInSeconds !== 0
 ) {
   fail('HTTP API authorizer caching is not disabled');
+}
+
+const expectedCors = {
+  AllowHeaders: [
+    'content-type',
+    'x-amz-date',
+    'authorization',
+    'x-api-key',
+    'x-amz-security-token',
+    'x-amz-user-agent',
+    'x-amzn-trace-id',
+  ],
+  AllowMethods: ['OPTIONS', 'POST', 'GET', 'DELETE', 'PUT'],
+  AllowOrigins: ['*'],
+};
+const actualCors = template.Resources.HttpApi?.Properties?.CorsConfiguration;
+if (JSON.stringify(actualCors) !== JSON.stringify(expectedCors)) {
+  fail(`HTTP API CORS is not canonical: ${JSON.stringify(actualCors)}`);
 }
 
 const extractionDirectory = mkdtempSync(

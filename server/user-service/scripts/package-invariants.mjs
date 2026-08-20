@@ -15,3 +15,19 @@ export function assertNoExternalIamPolicies(template) {
     );
   }
 }
+
+export function assertDynamoDbTablesRetained(template) {
+  const unretained = Object.entries(template.Resources ?? {}).filter(
+    ([, resource]) =>
+      resource.Type === 'AWS::DynamoDB::Table' &&
+      (resource.DeletionPolicy !== 'Retain' ||
+        resource.UpdateReplacePolicy !== 'Retain'),
+  );
+  if (unretained.length !== 0) {
+    throw new Error(
+      `DynamoDB tables must retain data on deletion and replacement: ${unretained
+        .map(([logicalId]) => logicalId)
+        .join(', ')}`,
+    );
+  }
+}

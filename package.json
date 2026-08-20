@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint:format": "npx --no-install lint-staged && npx --no-install pretty-quick --staged",
-    "client:deploy": "sls client deploy --no-config-change --no-policy-change --no-cors-change",
+    "client:deploy": "sls client deploy --no-config-change --no-policy-change --no-cors-change --no-delete-contents",
     "client:deploy:nc": "npm run client:deploy -- --no-confirm",
     "client:build:deploy": "npm run build && npm run client:deploy",
     "client:build:deploy:nc": "npm run build && npm run client:deploy:nc",
@@ -19,6 +19,9 @@
     "cloudfront:build:deploy:nc": "npm run client:build:deploy:nc && npm run cloudfront:invalidateCache",
     "cloudfront:update:build:deploy": "npm run cloudfront:setup && npm run cloudfront:build:deploy",
     "cloudfront:update:build:deploy:nc": "npm run cloudfront:setup && npm run cloudfront:build:deploy:nc",
+    "retained-resources:plan": "node scripts/retained-resource-recovery.mjs",
+    "retained-resources:run": "node scripts/retained-resource-recovery.mjs run",
+    "test:deploy-prereqs": "node --test serverless-single-page-app-plugin/index.test.js scripts/retained-resource-recovery.test.mjs",
     "lint": "ng lint",
     "prepare": "husky"
   },

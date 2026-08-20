@@ -31,7 +31,15 @@ provider:
             - arn:aws:dynamodb:${self:provider.region}:*:table/SpecializationTable
             - arn:aws:dynamodb:${self:provider.region}:*:table/BlacklistedTokensTable
   httpApi:
-    cors: true
+    cors:
+      allowedHeaders:
+        - content-type
+        - x-amz-date
+        - authorization
+        - x-api-key
+        - x-amz-security-token
+        - x-amz-user-agent
+        - x-amzn-trace-id
     authorizers:
       customLambdaAuthorizer:
         type: request
@@ -186,6 +194,8 @@ resources:
 
     UserTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: UserTable
         AttributeDefinitions:
@@ -230,6 +240,8 @@ resources:
 
     TrainerTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: TrainerTable
         AttributeDefinitions:
@@ -245,6 +257,8 @@ resources:
 
     SpecializationTable:
       Type: AWS::DynamoDB::Table
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: SpecializationTable
         AttributeDefinitions:
@@ -260,6 +274,8 @@ resources:
 
     BlacklistedTokensTable:
       Type: "AWS::DynamoDB::Table"
+      UpdateReplacePolicy: Retain
+      DeletionPolicy: Retain
       Properties:
         TableName: "BlacklistedTokensTable"
         AttributeDefinitions:
